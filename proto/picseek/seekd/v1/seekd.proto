@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package picseek.seekd.v1;
+
+import "google/protobuf/duration.proto";
+
+service SeekdService {
+  rpc AddFolders(AddFoldersRequest) returns (AddFoldersResponse);
+  rpc ForgetFolder(ForgetFolderRequest) returns (ForgetFolderResponse);
+  rpc RetryFailed(RetryFailedRequest) returns (RetryFailedResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc Status(StatusRequest) returns (StatusResponse);
+  rpc WatchStatus(WatchStatusRequest) returns (stream WatchStatusResponse);
+}
+
+enum MatchKind {
+  MATCH_KIND_UNSPECIFIED = 0;
+  MATCH_KIND_EXACT = 1;
+  MATCH_KIND_NEAR = 2;
+  MATCH_KIND_MEANING = 3;
+  MATCH_KIND_VISUAL = 4;
+}
+
+message Hit {
+  string path = 1;
+  int32 rank = 2;
+  MatchKind best = 3;
+  repeated MatchKind matches = 4;
+  double score = 5;
+}
+
+message ServiceHealth {
+  string name = 1;
+  int32 healthy = 2;
+  int32 total = 3;
+}
+
+message Status {
+  repeated string folders = 1;
+  int64 indexed = 2;
+  int64 queued_live = 3;
+  int64 queued_backfill = 4;
+  int64 failed = 5;
+  double images_per_second = 6;
+  google.protobuf.Duration eta = 7;
+  repeated ServiceHealth services = 8;
+}
+
+message AddFoldersRequest {
+  repeated string paths = 1;
+}
+
+message AddFoldersResponse {
+  repeated string added = 1;
+}
+
+message ForgetFolderRequest {
+  string path = 1;
+}
+
+message ForgetFolderResponse {
+  int64 removed_paths = 1;
+}
+
+message RetryFailedRequest {}
+
+message RetryFailedResponse {
+  int64 requeued = 1;
+}
+
+message SearchRequest {
+  string query = 1;
+  int32 limit = 2;
+}
+
+message SearchResponse {
+  repeated Hit hits = 1;
+  google.protobuf.Duration took = 2;
+}
+
+message StatusRequest {}
+
+message StatusResponse {
+  Status status = 1;
+}
+
+message WatchStatusRequest {}
+
+message WatchStatusResponse {
+  Status status = 1;
+}

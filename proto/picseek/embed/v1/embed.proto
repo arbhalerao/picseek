@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package picseek.embed.v1;
+
+import "picseek/common/v1/image.proto";
+
+service EmbedService {
+  rpc EmbedTexts(EmbedTextsRequest) returns (EmbedTextsResponse);
+  rpc EmbedImages(EmbedImagesRequest) returns (EmbedImagesResponse);
+  rpc EmbedClipTexts(EmbedClipTextsRequest) returns (EmbedClipTextsResponse);
+  rpc Info(InfoRequest) returns (InfoResponse);
+}
+
+message Vector {
+  repeated float values = 1;
+}
+
+message ModelInfo {
+  string name = 1;
+  string version = 2;
+  int32 dimensions = 3;
+}
+
+message EmbedTextsRequest {
+  repeated string texts = 1;
+}
+
+message EmbedTextsResponse {
+  repeated Vector vectors = 1;
+  ModelInfo model = 2;
+}
+
+message EmbedImagesRequest {
+  repeated picseek.common.v1.ImageSource images = 1;
+}
+
+message EmbedImagesResponse {
+  repeated Vector vectors = 1;
+  ModelInfo model = 2;
+}
+
+message EmbedClipTextsRequest {
+  repeated string texts = 1;
+}
+
+message EmbedClipTextsResponse {
+  repeated Vector vectors = 1;
+  ModelInfo model = 2;
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+  ModelInfo text = 1;
+  ModelInfo clip_image = 2;
+  ModelInfo clip_text = 3;
+}

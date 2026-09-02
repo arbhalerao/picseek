@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package picseek.ocr.v1;
+
+import "picseek/common/v1/image.proto";
+
+service OcrService {
+  rpc Recognize(RecognizeRequest) returns (RecognizeResponse);
+  rpc Info(InfoRequest) returns (InfoResponse);
+}
+
+message Box {
+  int32 x = 1;
+  int32 y = 2;
+  int32 width = 3;
+  int32 height = 4;
+}
+
+message Line {
+  string text = 1;
+  Box box = 2;
+  float confidence = 3;
+}
+
+message RecognizeRequest {
+  picseek.common.v1.ImageSource image = 1;
+}
+
+message RecognizeResponse {
+  repeated Line lines = 1;
+  int32 width = 2;
+  int32 height = 3;
+  string engine = 4;
+  string engine_version = 5;
+}
+
+message InfoRequest {}
+
+message InfoResponse {
+  string engine = 1;
+  string engine_version = 2;
+}

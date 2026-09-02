@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package picseek.common.v1;
+
+message ImageSource {
+  oneof source {
+    string path = 1;
+    bytes data = 2;
+  }
+}
