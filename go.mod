@@ -3,6 +3,7 @@ module github.com/arbhalerao/picseek
 go 1.25.0
 
 require (
+	github.com/pelletier/go-toml/v2 v2.4.3
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
 )
