@@ -1,0 +1,101 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"flag"
+	"fmt"
+	"log/slog"
+	"net"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"syscall"
+	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+
+	"github.com/arbhalerao/picseek/internal/config"
+)
+
+const (
+	drainTimeout  = 10 * time.Second
+	maxSocketPath = 107
+)
+
+func main() {
+	if err := run(); err != nil {
+		slog.Error("seekd stopped", "err", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
+	defaultPath, err := config.DefaultPath()
+	if err != nil {
+		return err
+	}
+	configPath := flag.String("config", defaultPath, "path to config.toml")
+	flag.Parse()
+
+	cfg, err := config.Load(*configPath)
+	if err != nil {
+		return err
+	}
+
+	lis, err := listenUnix(cfg.SocketPath("seekd"))
+	if err != nil {
+		return err
+	}
+
+	server := grpc.NewServer()
+	healthServer := health.NewServer()
+	healthpb.RegisterHealthServer(server, healthServer)
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	serveErr := make(chan error, 1)
+	go func() { serveErr <- server.Serve(lis) }()
+	slog.Info("seekd listening", "socket", lis.Addr().String(), "config", *configPath)
+
+	select {
+	case err := <-serveErr:
+		return err
+	case <-ctx.Done():
+	}
+
+	slog.Info("seekd shutting down")
+	healthServer.Shutdown()
+	shutdown(server)
+	return nil
+}
+
+func listenUnix(path string) (net.Listener, error) {
+	if len(path) > maxSocketPath {
+		return nil, fmt.Errorf("socket path %q is %d bytes, the limit is %d: set a shorter services.socket_dir", path, len(path), maxSocketPath)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return nil, err
+	}
+	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return nil, fmt.Errorf("remove stale socket: %w", err)
+	}
+	return net.Listen("unix", path)
+}
+
+func shutdown(server *grpc.Server) {
+	done := make(chan struct{})
+	go func() {
+		server.GracefulStop()
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(drainTimeout):
+		slog.Warn("drain timeout exceeded, forcing stop")
+		server.Stop()
+	}
+}
