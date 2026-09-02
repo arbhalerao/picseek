@@ -1,0 +1,13 @@
+[tool.uv.workspace]
+members = ["gen/python"]
+
+[dependency-groups]
+dev = ["ruff>=0.13"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["gen"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]

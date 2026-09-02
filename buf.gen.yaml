@@ -1,0 +1,22 @@
+version: v2
+clean: true
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/arbhalerao/picseek/gen/go
+plugins:
+  - remote: buf.build/protocolbuffers/go
+    out: gen/go
+    opt: paths=source_relative
+  - remote: buf.build/grpc/go
+    out: gen/go
+    opt: paths=source_relative
+  - remote: buf.build/protocolbuffers/python
+    out: gen/python/src
+  - remote: buf.build/protocolbuffers/pyi
+    out: gen/python/src
+  - remote: buf.build/grpc/python
+    out: gen/python/src
+inputs:
+  - directory: proto
