@@ -126,6 +126,28 @@ func (s *Store) FailJobs(ctx context.Context, failures []JobFailure) error {
 	})
 }
 
+func (s *Store) ReleaseAllLeases(ctx context.Context) (int64, error) {
+	res, err := s.write.ExecContext(ctx,
+		`UPDATE jobs SET lease_until = 0, attempts = MAX(attempts - 1, 0) WHERE lease_until > 0 AND failed = 0`)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
+}
+
+func (s *Store) ReleaseJobs(ctx context.Context, ids []int64) error {
+	return s.tx(ctx, func(tx *sql.Tx) error {
+		for _, id := range ids {
+			_, err := tx.ExecContext(ctx,
+				`UPDATE jobs SET lease_until = 0, attempts = MAX(attempts - 1, 0) WHERE id = ?`, id)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 func (s *Store) DropJobs(ctx context.Context, ids []int64) error {
 	return s.tx(ctx, func(tx *sql.Tx) error {
 		for _, id := range ids {

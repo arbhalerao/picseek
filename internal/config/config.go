@@ -51,7 +51,7 @@ func Default() Config {
 			MaxFileMB:  50,
 		},
 		OCR: OCR{
-			Workers:          4,
+			Workers:          3,
 			ThreadsPerWorker: 2,
 		},
 		Search: Search{
