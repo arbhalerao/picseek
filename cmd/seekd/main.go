@@ -18,6 +18,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
 	"github.com/arbhalerao/picseek/internal/config"
+	"github.com/arbhalerao/picseek/internal/daemon"
 )
 
 const (
@@ -45,6 +46,15 @@ func run() error {
 		return err
 	}
 
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	d, err := daemon.New(ctx, cfg, slog.Default())
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+
 	lis, err := listenUnix(cfg.SocketPath("seekd"))
 	if err != nil {
 		return err
@@ -54,16 +64,20 @@ func run() error {
 	healthServer := health.NewServer()
 	healthpb.RegisterHealthServer(server, healthServer)
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
-
 	serveErr := make(chan error, 1)
 	go func() { serveErr <- server.Serve(lis) }()
+	runErr := make(chan error, 1)
+	go func() { runErr <- d.Run(ctx) }()
 	slog.Info("seekd listening", "socket", lis.Addr().String(), "config", *configPath)
 
 	select {
 	case err := <-serveErr:
 		return err
+	case err := <-runErr:
+		if err != nil {
+			return err
+		}
+		<-ctx.Done()
 	case <-ctx.Done():
 	}
 

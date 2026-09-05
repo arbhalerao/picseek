@@ -75,6 +75,17 @@ func DefaultPath() (string, error) {
 	return filepath.Join(dir, "picseek", "config.toml"), nil
 }
 
+func DataDir() (string, error) {
+	if dir := os.Getenv("XDG_DATA_HOME"); dir != "" {
+		return filepath.Join(dir, "picseek"), nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".local", "share", "picseek"), nil
+}
+
 func Load(path string) (Config, error) {
 	cfg := Default()
 	data, err := os.ReadFile(path)
