@@ -1,4 +1,5 @@
 BIN := bin
+TAGS := sqlite_fts5
 
 .PHONY: gen build run lint fmt sync clean
 
@@ -6,7 +7,7 @@ gen:
 	buf generate
 
 build:
-	go build -o $(BIN)/ ./cmd/...
+	go build -tags $(TAGS) -o $(BIN)/ ./cmd/...
 
 run: build
 	$(BIN)/seekd
@@ -16,7 +17,7 @@ sync:
 
 lint:
 	buf lint
-	golangci-lint run ./...
+	golangci-lint run --build-tags $(TAGS) ./...
 	uv run ruff check .
 	uv run ruff format --check .
 

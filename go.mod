@@ -1,8 +1,9 @@
 module github.com/arbhalerao/picseek
 
-go 1.25.0
+go 1.26.0
 
 require (
+	github.com/mattn/go-sqlite3 v1.14.52
 	github.com/pelletier/go-toml/v2 v2.4.3
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12

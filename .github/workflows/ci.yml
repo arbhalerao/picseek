@@ -27,11 +27,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go build ./...
-      - run: go vet ./...
+      - run: go build -tags sqlite_fts5 ./...
+      - run: go vet -tags sqlite_fts5 ./...
       - uses: golangci/golangci-lint-action@v8
         with:
           version: v2.13.2
+          args: --build-tags sqlite_fts5
 
   python:
     runs-on: ubuntu-latest

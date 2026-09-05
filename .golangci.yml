@@ -9,6 +9,16 @@ linters:
     - unconvert
     - bodyclose
     - copyloopvar
+  settings:
+    errcheck:
+      exclude-functions:
+        - (io.Closer).Close
+        - (*os.File).Close
+        - (*database/sql.DB).Close
+        - (*database/sql.Rows).Close
+        - (*github.com/fsnotify/fsnotify.Watcher).Close
+        - (*github.com/arbhalerao/picseek/internal/store.Store).Close
+        - (*github.com/arbhalerao/picseek/internal/daemon.Daemon).Close
   exclusions:
     paths:
       - gen
