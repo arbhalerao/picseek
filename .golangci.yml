@@ -13,12 +13,15 @@ linters:
     errcheck:
       exclude-functions:
         - (io.Closer).Close
+        - (net.Conn).Close
         - (*os.File).Close
         - (*database/sql.DB).Close
         - (*database/sql.Rows).Close
         - (*github.com/fsnotify/fsnotify.Watcher).Close
         - (*github.com/arbhalerao/picseek/internal/store.Store).Close
         - (*github.com/arbhalerao/picseek/internal/daemon.Daemon).Close
+        - (*github.com/arbhalerao/picseek/internal/indexer.Watcher).Close
+        - (*github.com/arbhalerao/picseek/internal/ocr.Pool).Close
   exclusions:
     paths:
       - gen
