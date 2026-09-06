@@ -18,7 +18,7 @@ class RapidEngine:
         self._ocr = RapidOCR(
             params={
                 "Global.use_cls": False,
-                "Global.log_level": "warning",
+                "Global.log_level": "error",
                 "Global.model_root_dir": model_dir,
                 "Det.ocr_version": OCRVersion.PPOCRV6,
                 "Det.model_type": MODEL_TYPES[model],
