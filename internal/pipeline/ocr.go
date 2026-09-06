@@ -187,7 +187,7 @@ func (s *OCRStage) commit(outcomes <-chan outcome) error {
 			default:
 				done = append(done, store.OCRResult{JobID: o.job.ID, ImageID: o.job.ImageID, Text: o.result.Text, Version: o.result.Version})
 			}
-			if len(done)+len(failed)+len(dropped)+len(released) >= commitBatch {
+			if len(outcomes) == 0 || len(done)+len(failed)+len(dropped)+len(released) >= commitBatch {
 				if err := flush(); err != nil {
 					s.log.Error("commit ocr results", "err", err)
 				}

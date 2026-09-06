@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	settleDelay  = 500 * time.Millisecond
-	flushEvery   = 250 * time.Millisecond
+	settleDelay  = 300 * time.Millisecond
+	flushEvery   = 100 * time.Millisecond
 	maxPendingAt = 4096
 )
 
