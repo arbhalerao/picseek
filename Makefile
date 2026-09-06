@@ -10,7 +10,7 @@ build:
 	go build -tags $(TAGS) -o $(BIN)/ ./cmd/...
 
 run: build
-	$(BIN)/seekd
+	./scripts/dev.sh
 
 sync:
 	uv sync --all-packages
