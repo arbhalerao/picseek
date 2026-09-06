@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -15,6 +16,7 @@ import (
 	"github.com/arbhalerao/picseek/internal/indexer"
 	"github.com/arbhalerao/picseek/internal/ocr"
 	"github.com/arbhalerao/picseek/internal/pipeline"
+	"github.com/arbhalerao/picseek/internal/search"
 	"github.com/arbhalerao/picseek/internal/store"
 )
 
@@ -30,8 +32,11 @@ type Daemon struct {
 	watcher *indexer.Watcher
 	pool    *ocr.Pool
 	ocr     *pipeline.OCRStage
+	engine  *search.Engine
 	wake    chan struct{}
 	log     *slog.Logger
+	runCtx  context.Context
+	scans   sync.Map
 }
 
 func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Daemon, error) {
@@ -56,7 +61,7 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Daemon, err
 		}
 	}
 
-	d := &Daemon{cfg: cfg, store: st, wake: make(chan struct{}, 1), log: log}
+	d := &Daemon{cfg: cfg, store: st, wake: make(chan struct{}, 1), log: log, runCtx: ctx}
 	filter := indexer.NewFilter(cfg.Index.Extensions, cfg.Index.Exclude, cfg.Index.MaxFileMB)
 	d.indexer = indexer.New(st, filter, runtime.NumCPU(), d.notify, log)
 	if d.watcher, err = indexer.NewWatcher(d.indexer); err != nil {
@@ -75,6 +80,7 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Daemon, err
 		return nil, err
 	}
 	d.ocr = pipeline.NewOCRStage(st, d.pool, d.wake, log)
+	d.engine = search.NewEngine(st, search.NewExactRetriever(st))
 	return d, nil
 }
 
@@ -111,6 +117,10 @@ func (d *Daemon) Run(ctx context.Context) error {
 }
 
 func (d *Daemon) scan(ctx context.Context, root string) {
+	if _, running := d.scans.LoadOrStore(root, struct{}{}); running {
+		return
+	}
+	defer d.scans.Delete(root)
 	stats, err := d.indexer.Scan(ctx, root)
 	if err != nil {
 		if ctx.Err() == nil {

@@ -17,6 +17,8 @@ import (
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
+	seekdv1 "github.com/arbhalerao/picseek/gen/go/picseek/seekd/v1"
+	"github.com/arbhalerao/picseek/internal/api"
 	"github.com/arbhalerao/picseek/internal/config"
 	"github.com/arbhalerao/picseek/internal/daemon"
 )
@@ -63,6 +65,7 @@ func run() error {
 	server := grpc.NewServer()
 	healthServer := health.NewServer()
 	healthpb.RegisterHealthServer(server, healthServer)
+	seekdv1.RegisterSeekdServiceServer(server, api.NewServer(d))
 
 	serveErr := make(chan error, 1)
 	go func() { serveErr <- server.Serve(lis) }()
