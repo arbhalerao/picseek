@@ -49,16 +49,16 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	lis, err := listenUnix(cfg.SocketPath("seekd"))
+	if err != nil {
+		return err
+	}
+
 	d, err := daemon.New(ctx, cfg, slog.Default())
 	if err != nil {
 		return err
 	}
 	defer d.Close()
-
-	lis, err := listenUnix(cfg.SocketPath("seekd"))
-	if err != nil {
-		return err
-	}
 
 	server := grpc.NewServer()
 	healthServer := health.NewServer()
@@ -84,6 +84,14 @@ func run() error {
 	slog.Info("seekd shutting down")
 	healthServer.Shutdown()
 	shutdown(server)
+	select {
+	case err := <-runErr:
+		if err != nil {
+			slog.Warn("background work stopped with error", "err", err)
+		}
+	case <-time.After(drainTimeout):
+		slog.Warn("drain timeout exceeded, unfinished jobs will be retried")
+	}
 	return nil
 }
 
@@ -93,6 +101,10 @@ func listenUnix(path string) (net.Listener, error) {
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return nil, err
+	}
+	if conn, err := net.DialTimeout("unix", path, time.Second); err == nil {
+		conn.Close()
+		return nil, fmt.Errorf("seekd is already running on %s", path)
 	}
 	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return nil, fmt.Errorf("remove stale socket: %w", err)

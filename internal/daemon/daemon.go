@@ -3,6 +3,7 @@ package daemon
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"path/filepath"
 	"runtime"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/arbhalerao/picseek/internal/config"
 	"github.com/arbhalerao/picseek/internal/indexer"
+	"github.com/arbhalerao/picseek/internal/ocr"
+	"github.com/arbhalerao/picseek/internal/pipeline"
 	"github.com/arbhalerao/picseek/internal/store"
 )
 
@@ -25,6 +28,8 @@ type Daemon struct {
 	store   *store.Store
 	indexer *indexer.Indexer
 	watcher *indexer.Watcher
+	pool    *ocr.Pool
+	ocr     *pipeline.OCRStage
 	wake    chan struct{}
 	log     *slog.Logger
 }
@@ -37,6 +42,12 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Daemon, err
 	st, err := store.Open(ctx, filepath.Join(dataDir, "index.db"))
 	if err != nil {
 		return nil, err
+	}
+	if n, err := st.ReleaseAllLeases(ctx); err != nil {
+		st.Close()
+		return nil, err
+	} else if n > 0 {
+		log.Info("released leases left by a previous run", "jobs", n)
 	}
 	for _, folder := range cfg.Index.Folders {
 		if _, err := st.AddFolder(ctx, folder); err != nil {
@@ -52,11 +63,23 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Daemon, err
 		st.Close()
 		return nil, err
 	}
+
+	sockets := make(map[string]string, cfg.OCR.Workers)
+	for i := 1; i <= cfg.OCR.Workers; i++ {
+		name := fmt.Sprintf("ocr-%d", i)
+		sockets[name] = cfg.SocketPath(name)
+	}
+	if d.pool, err = ocr.NewPool(sockets, log); err != nil {
+		d.watcher.Close()
+		st.Close()
+		return nil, err
+	}
+	d.ocr = pipeline.NewOCRStage(st, d.pool, d.wake, log)
 	return d, nil
 }
 
 func (d *Daemon) Close() error {
-	return errors.Join(d.watcher.Close(), d.store.Close())
+	return errors.Join(d.watcher.Close(), d.pool.Close(), d.store.Close())
 }
 
 func (d *Daemon) Run(ctx context.Context) error {
@@ -79,6 +102,11 @@ func (d *Daemon) Run(ctx context.Context) error {
 		return nil
 	})
 	g.Go(func() error { return d.collectGarbage(gctx) })
+	g.Go(func() error {
+		d.pool.MonitorHealth(gctx)
+		return nil
+	})
+	g.Go(func() error { return d.ocr.Run(gctx) })
 	return g.Wait()
 }
 
