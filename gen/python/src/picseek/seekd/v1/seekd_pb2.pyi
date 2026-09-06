@@ -48,7 +48,7 @@ class ServiceHealth(_message.Message):
     def __init__(self, name: _Optional[str] = ..., healthy: _Optional[int] = ..., total: _Optional[int] = ...) -> None: ...
 
 class Status(_message.Message):
-    __slots__ = ("folders", "indexed", "queued_live", "queued_backfill", "failed", "images_per_second", "eta", "services")
+    __slots__ = ("folders", "indexed", "queued_live", "queued_backfill", "failed", "images_per_second", "eta", "services", "skipped")
     FOLDERS_FIELD_NUMBER: _ClassVar[int]
     INDEXED_FIELD_NUMBER: _ClassVar[int]
     QUEUED_LIVE_FIELD_NUMBER: _ClassVar[int]
@@ -57,6 +57,7 @@ class Status(_message.Message):
     IMAGES_PER_SECOND_FIELD_NUMBER: _ClassVar[int]
     ETA_FIELD_NUMBER: _ClassVar[int]
     SERVICES_FIELD_NUMBER: _ClassVar[int]
+    SKIPPED_FIELD_NUMBER: _ClassVar[int]
     folders: _containers.RepeatedScalarFieldContainer[str]
     indexed: int
     queued_live: int
@@ -65,7 +66,8 @@ class Status(_message.Message):
     images_per_second: float
     eta: _duration_pb2.Duration
     services: _containers.RepeatedCompositeFieldContainer[ServiceHealth]
-    def __init__(self, folders: _Optional[_Iterable[str]] = ..., indexed: _Optional[int] = ..., queued_live: _Optional[int] = ..., queued_backfill: _Optional[int] = ..., failed: _Optional[int] = ..., images_per_second: _Optional[float] = ..., eta: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., services: _Optional[_Iterable[_Union[ServiceHealth, _Mapping]]] = ...) -> None: ...
+    skipped: int
+    def __init__(self, folders: _Optional[_Iterable[str]] = ..., indexed: _Optional[int] = ..., queued_live: _Optional[int] = ..., queued_backfill: _Optional[int] = ..., failed: _Optional[int] = ..., images_per_second: _Optional[float] = ..., eta: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., services: _Optional[_Iterable[_Union[ServiceHealth, _Mapping]]] = ..., skipped: _Optional[int] = ...) -> None: ...
 
 class AddFoldersRequest(_message.Message):
     __slots__ = ("paths",)

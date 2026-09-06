@@ -44,6 +44,7 @@ message Status {
   double images_per_second = 6;
   google.protobuf.Duration eta = 7;
   repeated ServiceHealth services = 8;
+  int64 skipped = 9;
 }
 
 message AddFoldersRequest {

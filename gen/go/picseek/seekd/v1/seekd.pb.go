@@ -223,6 +223,7 @@ type Status struct {
 	ImagesPerSecond float64                `protobuf:"fixed64,6,opt,name=images_per_second,json=imagesPerSecond,proto3" json:"images_per_second,omitempty"`
 	Eta             *durationpb.Duration   `protobuf:"bytes,7,opt,name=eta,proto3" json:"eta,omitempty"`
 	Services        []*ServiceHealth       `protobuf:"bytes,8,rep,name=services,proto3" json:"services,omitempty"`
+	Skipped         int64                  `protobuf:"varint,9,opt,name=skipped,proto3" json:"skipped,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -311,6 +312,13 @@ func (x *Status) GetServices() []*ServiceHealth {
 		return x.Services
 	}
 	return nil
+}
+
+func (x *Status) GetSkipped() int64 {
+	if x != nil {
+		return x.Skipped
+	}
+	return 0
 }
 
 type AddFoldersRequest struct {
@@ -847,7 +855,7 @@ const file_picseek_seekd_v1_seekd_proto_rawDesc = "" +
 	"\rServiceHealth\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
 	"\ahealthy\x18\x02 \x01(\x05R\ahealthy\x12\x14\n" +
-	"\x05total\x18\x03 \x01(\x05R\x05total\"\xb4\x02\n" +
+	"\x05total\x18\x03 \x01(\x05R\x05total\"\xce\x02\n" +
 	"\x06Status\x12\x18\n" +
 	"\afolders\x18\x01 \x03(\tR\afolders\x12\x18\n" +
 	"\aindexed\x18\x02 \x01(\x03R\aindexed\x12\x1f\n" +
@@ -857,7 +865,8 @@ const file_picseek_seekd_v1_seekd_proto_rawDesc = "" +
 	"\x06failed\x18\x05 \x01(\x03R\x06failed\x12*\n" +
 	"\x11images_per_second\x18\x06 \x01(\x01R\x0fimagesPerSecond\x12+\n" +
 	"\x03eta\x18\a \x01(\v2\x19.google.protobuf.DurationR\x03eta\x12;\n" +
-	"\bservices\x18\b \x03(\v2\x1f.picseek.seekd.v1.ServiceHealthR\bservices\")\n" +
+	"\bservices\x18\b \x03(\v2\x1f.picseek.seekd.v1.ServiceHealthR\bservices\x12\x18\n" +
+	"\askipped\x18\t \x01(\x03R\askipped\")\n" +
 	"\x11AddFoldersRequest\x12\x14\n" +
 	"\x05paths\x18\x01 \x03(\tR\x05paths\"*\n" +
 	"\x12AddFoldersResponse\x12\x14\n" +
