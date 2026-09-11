@@ -20,6 +20,7 @@ linters:
         - (*os.File).Close
         - (*database/sql.DB).Close
         - (*database/sql.Rows).Close
+        - (*database/sql.Stmt).Close
         - (*github.com/fsnotify/fsnotify.Watcher).Close
         - (*github.com/arbhalerao/picseek/internal/store.Store).Close
         - (*github.com/arbhalerao/picseek/internal/daemon.Daemon).Close

@@ -39,6 +39,10 @@ func Open(ctx context.Context, path string) (*Store, error) {
 		write.Close()
 		return nil, fmt.Errorf("migrate %s: %w", path, err)
 	}
+	if err := refreshNormalizedText(ctx, write); err != nil {
+		write.Close()
+		return nil, fmt.Errorf("refresh normalized text: %w", err)
+	}
 
 	read, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?%s&_query_only=true", path, params))
 	if err != nil {
@@ -81,6 +85,7 @@ func migrate(ctx context.Context, db *sql.DB) error {
 			if _, err := tx.ExecContext(ctx, string(body)); err != nil {
 				return fmt.Errorf("%s: %w", version, err)
 			}
+
 			_, err := tx.ExecContext(ctx, `INSERT INTO schema_migrations (version) VALUES (?)`, version)
 			return err
 		})

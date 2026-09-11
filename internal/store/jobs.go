@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/arbhalerao/picseek/internal/textnorm"
 )
 
 type Job struct {
@@ -90,10 +92,13 @@ func (s *Store) CompleteOCR(ctx context.Context, results []OCRResult) error {
 			if _, err := tx.ExecContext(ctx, `DELETE FROM image_text WHERE rowid = ?`, r.ImageID); err != nil {
 				return err
 			}
-			if _, err := tx.ExecContext(ctx, `INSERT INTO image_text (rowid, text) VALUES (?, ?)`, r.ImageID, r.Text); err != nil {
+			_, err := tx.ExecContext(ctx,
+				`INSERT INTO image_text (rowid, text, folded, compact) VALUES (?, ?, ?, ?)`,
+				r.ImageID, r.Text, textnorm.Fold(r.Text), textnorm.Compact(r.Text))
+			if err != nil {
 				return err
 			}
-			_, err := tx.ExecContext(ctx,
+			_, err = tx.ExecContext(ctx,
 				`INSERT INTO enrichments (image_id, enricher, version, done_at) VALUES (?, ?, ?, ?)
 				 ON CONFLICT (image_id, enricher) DO UPDATE SET version = excluded.version, done_at = excluded.done_at`,
 				r.ImageID, KindOCR, r.Version, now)
