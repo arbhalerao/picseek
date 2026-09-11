@@ -6,10 +6,12 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"golang.org/x/sync/errgroup"
 
 	"github.com/arbhalerao/picseek/internal/store"
+	"github.com/arbhalerao/picseek/internal/textnorm"
 )
 
 type MatchKind int
@@ -159,16 +161,44 @@ func NewExactRetriever(st *store.Store) *ExactRetriever {
 }
 
 func (r *ExactRetriever) Retrieve(ctx context.Context, q Query, limit int) ([]Candidate, error) {
-	terms := make([]string, 0, len(q.Words)+len(q.Phrases))
-	for _, t := range append(slices.Clone(q.Words), q.Phrases...) {
-		terms = append(terms, `"`+strings.ReplaceAll(t, `"`, `""`)+`"`)
-	}
 	kind := MatchExact
 	if !q.HasText() {
 		kind = MatchFilter
 	}
-	hits, err := r.store.SearchText(ctx, store.TextQuery{
-		Match:  strings.Join(terms, " AND "),
+	return retrieve(ctx, r.store, q, exactExpr(q), kind, limit)
+}
+
+type NearRetriever struct {
+	store *store.Store
+}
+
+func NewNearRetriever(st *store.Store) *NearRetriever {
+	return &NearRetriever{store: st}
+}
+
+func (r *NearRetriever) Retrieve(ctx context.Context, q Query, limit int) ([]Candidate, error) {
+	exact := exactExpr(q)
+	if exact == "" {
+		return nil, nil
+	}
+	var clauses []string
+	for _, t := range textTerms(q) {
+		folded := textnorm.Fold(t)
+		if utf8.RuneCountInString(folded) < minTrigram {
+			continue
+		}
+		clauses = append(clauses, "{folded compact} : "+quote(folded))
+	}
+	if len(clauses) == 0 {
+		return nil, nil
+	}
+	expr := "(" + strings.Join(clauses, " AND ") + ") NOT (" + exact + ")"
+	return retrieve(ctx, r.store, q, expr, MatchNear, limit)
+}
+
+func retrieve(ctx context.Context, st *store.Store, q Query, match string, kind MatchKind, limit int) ([]Candidate, error) {
+	hits, err := st.SearchText(ctx, store.TextQuery{
+		Match:  match,
 		Folder: q.Folder,
 		After:  q.After,
 		Before: q.Before,
@@ -184,6 +214,26 @@ func (r *ExactRetriever) Retrieve(ctx context.Context, q Query, limit int) ([]Ca
 		out[i] = Candidate{ImageID: h.ImageID, Kind: kind, Score: h.Score, TakenAt: h.TakenAt}
 	}
 	return out, nil
+}
+
+func exactExpr(q Query) string {
+	terms := textTerms(q)
+	if len(terms) == 0 {
+		return ""
+	}
+	quoted := make([]string, len(terms))
+	for i, t := range terms {
+		quoted[i] = quote(t)
+	}
+	return "text : (" + strings.Join(quoted, " AND ") + ")"
+}
+
+func textTerms(q Query) []string {
+	return append(slices.Clone(q.Words), q.Phrases...)
+}
+
+func quote(term string) string {
+	return `"` + strings.ReplaceAll(term, `"`, `""`) + `"`
 }
 
 func keepFunc(q Query) func(string) bool {

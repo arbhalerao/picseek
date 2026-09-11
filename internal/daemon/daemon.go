@@ -80,7 +80,7 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Daemon, err
 		return nil, err
 	}
 	d.ocr = pipeline.NewOCRStage(st, d.pool, d.wake, log)
-	d.engine = search.NewEngine(st, search.NewExactRetriever(st))
+	d.engine = search.NewEngine(st, search.NewExactRetriever(st), search.NewNearRetriever(st))
 	return d, nil
 }
 
