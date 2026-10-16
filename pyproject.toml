@@ -1,5 +1,5 @@
 [tool.uv.workspace]
-members = ["gen/python", "services/ocr"]
+members = ["gen/python", "services/runtime", "services/ocr", "services/embed"]
 
 [dependency-groups]
 dev = ["ruff>=0.13"]

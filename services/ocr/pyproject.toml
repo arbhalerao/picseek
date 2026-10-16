@@ -4,8 +4,8 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "picseek-proto",
+    "picseek-runtime",
     "grpcio>=1.75",
-    "grpcio-health-checking>=1.75",
     "rapidocr>=3.9",
     "onnxruntime>=1.29",
     "numpy>=2.0",
@@ -20,6 +20,7 @@ picseek-ocr = "picseek_ocr.server:main"
 
 [tool.uv.sources]
 picseek-proto = { workspace = true }
+picseek-runtime = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

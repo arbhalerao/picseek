@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 members = [
     "picseek-ocr",
     "picseek-proto",
+    "picseek-runtime",
 ]
 
 [manifest.dependency-groups]
@@ -402,10 +403,10 @@ version = "0.1.0"
 source = { editable = "services/ocr" }
 dependencies = [
     { name = "grpcio" },
-    { name = "grpcio-health-checking" },
     { name = "numpy" },
     { name = "onnxruntime" },
     { name = "picseek-proto" },
+    { name = "picseek-runtime" },
     { name = "pillow" },
     { name = "rapidocr" },
 ]
@@ -418,10 +419,10 @@ tesseract = [
 [package.metadata]
 requires-dist = [
     { name = "grpcio", specifier = ">=1.75" },
-    { name = "grpcio-health-checking", specifier = ">=1.75" },
     { name = "numpy", specifier = ">=2.0" },
     { name = "onnxruntime", specifier = ">=1.29" },
     { name = "picseek-proto", editable = "gen/python" },
+    { name = "picseek-runtime", editable = "services/runtime" },
     { name = "pillow", specifier = ">=11.0" },
     { name = "pytesseract", marker = "extra == 'tesseract'", specifier = ">=0.3.13" },
     { name = "rapidocr", specifier = ">=3.9" },
@@ -441,6 +442,21 @@ dependencies = [
 requires-dist = [
     { name = "grpcio", specifier = ">=1.75" },
     { name = "protobuf", specifier = ">=7.36.1" },
+]
+
+[[package]]
+name = "picseek-runtime"
+version = "0.1.0"
+source = { editable = "services/runtime" }
+dependencies = [
+    { name = "grpcio" },
+    { name = "grpcio-health-checking" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "grpcio", specifier = ">=1.75" },
+    { name = "grpcio-health-checking", specifier = ">=1.75" },
 ]
 
 [[package]]
