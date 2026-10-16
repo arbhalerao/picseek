@@ -1,4 +1,4 @@
-package ocr
+package breaker
 
 import (
 	"sync"
@@ -14,7 +14,7 @@ type Breaker struct {
 	probing   bool
 }
 
-func NewBreaker(threshold int, cooldown time.Duration) *Breaker {
+func New(threshold int, cooldown time.Duration) *Breaker {
 	return &Breaker{threshold: threshold, cooldown: cooldown}
 }
 

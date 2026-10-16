@@ -14,6 +14,7 @@ import (
 
 	commonv1 "github.com/arbhalerao/picseek/gen/go/picseek/common/v1"
 	ocrv1 "github.com/arbhalerao/picseek/gen/go/picseek/ocr/v1"
+	"github.com/arbhalerao/picseek/internal/breaker"
 )
 
 const (
@@ -30,7 +31,7 @@ type Worker struct {
 	conn    *grpc.ClientConn
 	client  ocrv1.OcrServiceClient
 	health  healthpb.HealthClient
-	breaker *Breaker
+	breaker *breaker.Breaker
 	healthy atomic.Bool
 }
 
@@ -57,7 +58,7 @@ func NewPool(sockets map[string]string, log *slog.Logger) (*Pool, error) {
 			conn:    conn,
 			client:  ocrv1.NewOcrServiceClient(conn),
 			health:  healthpb.NewHealthClient(conn),
-			breaker: NewBreaker(breakerThreshold, breakerCooldown),
+			breaker: breaker.New(breakerThreshold, breakerCooldown),
 		})
 	}
 	return p, nil
@@ -140,7 +141,7 @@ func (w *Worker) MarkUnhealthy() {
 	w.healthy.Store(false)
 }
 
-func (w *Worker) Breaker() *Breaker {
+func (w *Worker) Breaker() *breaker.Breaker {
 	return w.breaker
 }
 
