@@ -31,7 +31,7 @@ jobs:
       - run: go vet -tags sqlite_fts5 ./...
       - uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.13.2
+          version: v2.15.0
           args: --build-tags sqlite_fts5
 
   python:
