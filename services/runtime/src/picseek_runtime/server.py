@@ -73,6 +73,8 @@ def listen_address(path: str) -> str:
 
 
 def default_model_dir() -> Path:
+    if configured := os.environ.get("PICSEEK_MODEL_DIR"):
+        return Path(configured)
     cache = os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache"
     return Path(cache) / "picseek" / "models"
 

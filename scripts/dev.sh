@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+export PICSEEK_MODEL_DIR="${PICSEEK_MODEL_DIR:-$repo/.models}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$repo/.data}"
+
 workers="${OCR_WORKERS:-3}"
 threads="${OCR_THREADS:-2}"
-socket_dir="${XDG_RUNTIME_DIR:-/tmp}/picseek"
+socket_dir="${PICSEEK_SOCKET_DIR:-${XDG_RUNTIME_DIR:-/tmp}/picseek}"
 pids=()
 
 run_worker() {
