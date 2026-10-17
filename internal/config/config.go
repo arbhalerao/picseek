@@ -46,7 +46,6 @@ type Services struct {
 func Default() Config {
 	return Config{
 		Index: Index{
-			Folders:    []string{"~/Pictures/Screenshots"},
 			Exclude:    []string{"**/node_modules", "**/.*"},
 			Extensions: []string{"png", "jpg", "jpeg", "webp", "bmp", "tiff", "gif"},
 			MaxFileMB:  50,
