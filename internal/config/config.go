@@ -57,9 +57,9 @@ func Default() Config {
 		},
 		Search: Search{
 			DefaultLimit:   20,
-			SemanticMin:    0.45,
-			SemanticMargin: 0.15,
-			VisualMin:      0.025,
+			SemanticMin:    0.3,
+			SemanticMargin: 0.2,
+			VisualMin:      0.02,
 			VisualMargin:   0.02,
 			TypeMin:        0.3,
 		},

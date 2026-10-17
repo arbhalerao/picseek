@@ -24,9 +24,9 @@ PERMISSIVE = {
     "type_min": 0.0,
 }
 SHIPPED = {
-    "semantic_min": 0.45,
-    "semantic_margin": 0.15,
-    "visual_min": 0.025,
+    "semantic_min": 0.3,
+    "semantic_margin": 0.2,
+    "visual_min": 0.02,
     "visual_margin": 0.02,
     "type_min": 0.3,
 }
