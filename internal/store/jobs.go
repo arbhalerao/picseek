@@ -34,6 +34,7 @@ type QueueCounts struct {
 	Indexed        int64
 	QueuedLive     int64
 	QueuedBackfill int64
+	QueuedEnrich   int64
 	Failed         int64
 }
 
@@ -105,7 +106,16 @@ func (s *Store) CompleteOCR(ctx context.Context, results []OCRResult) error {
 			if err != nil {
 				return err
 			}
+			var lane Lane
+			var priority int64
+			err = tx.QueryRowContext(ctx, `SELECT lane, priority FROM jobs WHERE id = ?`, r.JobID).Scan(&lane, &priority)
+			if err != nil && !errors.Is(err, sql.ErrNoRows) {
+				return err
+			}
 			if _, err := tx.ExecContext(ctx, `DELETE FROM jobs WHERE id = ?`, r.JobID); err != nil {
+				return err
+			}
+			if err := enqueue(ctx, tx, r.ImageID, KindEmbedText, lane, priority); err != nil {
 				return err
 			}
 		}
@@ -193,9 +203,10 @@ func (s *Store) Counts(ctx context.Context) (QueueCounts, error) {
 		`SELECT
 		     (SELECT COUNT(*) FROM enrichments e JOIN images i ON i.id = e.image_id
 		      WHERE e.enricher = ? AND i.orphaned_at IS NULL),
-		     (SELECT COUNT(*) FROM jobs WHERE failed = 0 AND lane = ?),
-		     (SELECT COUNT(*) FROM jobs WHERE failed = 0 AND lane = ?),
+		     (SELECT COUNT(*) FROM jobs WHERE failed = 0 AND kind = ? AND lane = ?),
+		     (SELECT COUNT(*) FROM jobs WHERE failed = 0 AND kind = ? AND lane = ?),
+		     (SELECT COUNT(*) FROM jobs WHERE failed = 0 AND kind != ?),
 		     (SELECT COUNT(*) FROM jobs WHERE failed = 1)`,
-		KindOCR, int(LaneLive), int(LaneBackfill)).Scan(&c.Indexed, &c.QueuedLive, &c.QueuedBackfill, &c.Failed)
+		KindOCR, KindOCR, int(LaneLive), KindOCR, int(LaneBackfill), KindOCR).Scan(&c.Indexed, &c.QueuedLive, &c.QueuedBackfill, &c.QueuedEnrich, &c.Failed)
 	return c, err
 }

@@ -127,6 +127,9 @@ func (s *Store) UpsertFiles(ctx context.Context, files []FileRecord) (UpsertResu
 				if err := enqueue(ctx, tx, imageID, KindOCR, f.Lane, f.TakenAt.Unix()); err != nil {
 					return err
 				}
+				if err := enqueue(ctx, tx, imageID, KindEmbedImage, f.Lane, f.TakenAt.Unix()); err != nil {
+					return err
+				}
 				result.NewImages++
 			case err != nil:
 				return err
