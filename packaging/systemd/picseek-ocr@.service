@@ -1,0 +1,12 @@
+[Unit]
+Description=picseek OCR worker %i
+
+[Service]
+ExecStart=%h/.local/lib/picseek/ocr/bin/picseek-ocr --socket %t/picseek/ocr-%i.sock
+Restart=on-failure
+RestartSec=2
+Nice=19
+IOSchedulingClass=idle
+
+[Install]
+WantedBy=default.target

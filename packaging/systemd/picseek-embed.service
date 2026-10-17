@@ -1,0 +1,12 @@
+[Unit]
+Description=picseek embedding service
+
+[Service]
+ExecStart=%h/.local/lib/picseek/embed/bin/picseek-embed --socket %t/picseek/embed.sock
+Restart=on-failure
+RestartSec=2
+Nice=19
+IOSchedulingClass=idle
+
+[Install]
+WantedBy=default.target

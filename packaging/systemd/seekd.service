@@ -1,0 +1,13 @@
+[Unit]
+Description=picseek indexing and search daemon
+Wants=picseek-ocr@1.service picseek-ocr@2.service picseek-ocr@3.service picseek-embed.service
+After=picseek-ocr@1.service picseek-ocr@2.service picseek-ocr@3.service picseek-embed.service
+
+[Service]
+ExecStart=%h/.local/bin/seekd
+Restart=on-failure
+RestartSec=2
+Nice=10
+
+[Install]
+WantedBy=default.target
