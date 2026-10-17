@@ -58,8 +58,8 @@ func Default() Config {
 			DefaultLimit:   20,
 			SemanticMin:    0.45,
 			SemanticMargin: 0.15,
-			VisualMin:      0.22,
-			VisualMargin:   0.05,
+			VisualMin:      0.025,
+			VisualMargin:   0.02,
 		},
 		Services: Services{
 			SocketDir: filepath.Join(runtimeDir(), "picseek"),

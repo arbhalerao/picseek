@@ -53,25 +53,36 @@ type Result struct {
 	Took  time.Duration
 }
 
+type Layer struct {
+	Kind      MatchKind
+	Retriever Retriever
+}
+
 type Engine struct {
-	store      *store.Store
-	retrievers []Retriever
+	store  *store.Store
+	layers []Layer
 }
 
-func NewEngine(st *store.Store, retrievers ...Retriever) *Engine {
-	return &Engine{store: st, retrievers: retrievers}
+func NewEngine(st *store.Store, layers ...Layer) *Engine {
+	return &Engine{store: st, layers: layers}
 }
 
-func (e *Engine) Search(ctx context.Context, raw string, limit int) (Result, error) {
+func (e *Engine) Search(ctx context.Context, raw string, limit int, only []MatchKind) (Result, error) {
 	started := time.Now()
 	q, err := Parse(raw, started)
 	if err != nil {
 		return Result{}, err
 	}
 
-	sets := make([][]Candidate, len(e.retrievers))
+	var active []Retriever
+	for _, l := range e.layers {
+		if len(only) == 0 || slices.Contains(only, l.Kind) {
+			active = append(active, l.Retriever)
+		}
+	}
+	sets := make([][]Candidate, len(active))
 	g, gctx := errgroup.WithContext(ctx)
-	for i, r := range e.retrievers {
+	for i, r := range active {
 		g.Go(func() error {
 			found, err := r.Retrieve(gctx, q, limit)
 			sets[i] = found
@@ -107,8 +118,10 @@ func (e *Engine) Search(ctx context.Context, raw string, limit int) (Result, err
 type ranked struct {
 	best  Candidate
 	kinds []MatchKind
-	order int
+	order float64
 }
+
+const rrfK = 60
 
 func rank(sets [][]Candidate) []ranked {
 	byImage := make(map[int64]*ranked)
@@ -117,11 +130,17 @@ func rank(sets [][]Candidate) []ranked {
 		for i, c := range set {
 			r, ok := byImage[c.ImageID]
 			if !ok {
-				r = &ranked{best: c, order: i}
+				r = &ranked{best: c}
 				byImage[c.ImageID] = r
 				out = append(out, r)
-			} else if tier(c.Kind) < tier(r.best.Kind) {
-				r.best, r.order = c, i
+			}
+			switch {
+			case !ok:
+				r.order = position(c.Kind, i)
+			case tier(c.Kind) < tier(r.best.Kind):
+				r.best, r.order = c, position(c.Kind, i)
+			case tier(c.Kind) == tier(r.best.Kind) && tier(c.Kind) == semanticTier:
+				r.order += position(c.Kind, i)
 			}
 			if !slices.Contains(r.kinds, c.Kind) {
 				r.kinds = append(r.kinds, c.Kind)
@@ -132,7 +151,14 @@ func rank(sets [][]Candidate) []ranked {
 		if ta, tb := tier(a.best.Kind), tier(b.best.Kind); ta != tb {
 			return ta - tb
 		}
-		return a.order - b.order
+		switch {
+		case a.order < b.order:
+			return -1
+		case a.order > b.order:
+			return 1
+		default:
+			return 0
+		}
 	})
 	result := make([]ranked, len(out))
 	for i, r := range out {
@@ -140,6 +166,15 @@ func rank(sets [][]Candidate) []ranked {
 	}
 	return result
 }
+
+func position(k MatchKind, index int) float64 {
+	if tier(k) == semanticTier {
+		return -1 / float64(rrfK+index+1)
+	}
+	return float64(index)
+}
+
+const semanticTier = 2
 
 func tier(k MatchKind) int {
 	switch k {
