@@ -1,8 +1,10 @@
 import argparse
 
 import grpc
+import numpy as np
 from picseek.ocr.v1 import ocr_pb2, ocr_pb2_grpc
 from picseek_runtime import Lazy, configure_logging, default_model_dir, serve
+from PIL import Image, ImageDraw
 
 from picseek_ocr import engines, images
 from picseek_ocr.types import OcrEngine
@@ -55,17 +57,30 @@ class OcrServicer(ocr_pb2_grpc.OcrServiceServicer):
             return ocr_pb2.InfoResponse(engine=engine.name, engine_version=engine.version)
 
 
+def warm_up(engine: OcrEngine) -> None:
+    image = Image.new("RGB", (320, 64), "white")
+    ImageDraw.Draw(image).text((10, 12), "picseek", fill="black", font_size=32)
+    engine.recognize(np.asarray(image))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="picseek-ocr")
-    parser.add_argument("--socket", required=True, help="unix socket path to listen on")
+    parser.add_argument("--socket", help="unix socket path to listen on")
     parser.add_argument("--engine", choices=["rapidocr", "tesseract"], default="rapidocr")
     parser.add_argument("--model", choices=["tiny", "small"], default="tiny")
     parser.add_argument("--threads", type=int, default=2)
     parser.add_argument("--model-dir", default=str(default_model_dir()))
     parser.add_argument("--idle-unload", type=float, default=300, help="seconds, 0 disables")
     parser.add_argument("--log-level", default="INFO")
+    parser.add_argument("--download-models", action="store_true", help="fetch models and exit")
     args = parser.parse_args()
     configure_logging(args.log_level)
+
+    if args.download_models:
+        warm_up(engines.build(args.engine, args.model, args.threads, args.model_dir))
+        return
+    if not args.socket:
+        parser.error("--socket is required")
 
     engine = Lazy(
         args.engine,
