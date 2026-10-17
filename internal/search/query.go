@@ -22,6 +22,7 @@ type Query struct {
 	After   time.Time
 	Before  time.Time
 	Type    string
+	TypeMin float64
 }
 
 func (q Query) HasText() bool {

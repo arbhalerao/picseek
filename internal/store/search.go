@@ -7,13 +7,14 @@ import (
 )
 
 type TextQuery struct {
-	Match  string
-	Folder string
-	After  time.Time
-	Before time.Time
-	Type   string
-	Keep   func(text string) bool
-	Limit  int
+	Match   string
+	Folder  string
+	After   time.Time
+	Before  time.Time
+	Type    string
+	TypeMin float64
+	Keep    func(text string) bool
+	Limit   int
 }
 
 type TextHit struct {
@@ -44,8 +45,8 @@ func (s *Store) SearchText(ctx context.Context, q TextQuery) ([]TextHit, error) 
 		args = append(args, q.Before.Unix())
 	}
 	if q.Type != "" {
-		b.WriteString(` AND i.type = ?`)
-		args = append(args, q.Type)
+		b.WriteString(` AND i.type = ? AND i.type_score >= ?`)
+		args = append(args, q.Type, q.TypeMin)
 	}
 	if q.Folder != "" {
 		b.WriteString(` AND EXISTS (SELECT 1 FROM paths p WHERE p.image_id = i.id AND p.dir LIKE ? ESCAPE '\')`)

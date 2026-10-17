@@ -59,12 +59,13 @@ type Layer struct {
 }
 
 type Engine struct {
-	store  *store.Store
-	layers []Layer
+	store   *store.Store
+	typeMin float64
+	layers  []Layer
 }
 
-func NewEngine(st *store.Store, layers ...Layer) *Engine {
-	return &Engine{store: st, layers: layers}
+func NewEngine(st *store.Store, typeMin float64, layers ...Layer) *Engine {
+	return &Engine{store: st, typeMin: typeMin, layers: layers}
 }
 
 func (e *Engine) Search(ctx context.Context, raw string, limit int, only []MatchKind) (Result, error) {
@@ -73,6 +74,7 @@ func (e *Engine) Search(ctx context.Context, raw string, limit int, only []Match
 	if err != nil {
 		return Result{}, err
 	}
+	q.TypeMin = e.typeMin
 
 	var active []Retriever
 	for _, l := range e.layers {
@@ -233,13 +235,14 @@ func (r *NearRetriever) Retrieve(ctx context.Context, q Query, limit int) ([]Can
 
 func retrieve(ctx context.Context, st *store.Store, q Query, match string, kind MatchKind, limit int) ([]Candidate, error) {
 	hits, err := st.SearchText(ctx, store.TextQuery{
-		Match:  match,
-		Folder: q.Folder,
-		After:  q.After,
-		Before: q.Before,
-		Type:   q.Type,
-		Keep:   keepFunc(q),
-		Limit:  limit,
+		Match:   match,
+		Folder:  q.Folder,
+		After:   q.After,
+		Before:  q.Before,
+		Type:    q.Type,
+		TypeMin: q.TypeMin,
+		Keep:    keepFunc(q),
+		Limit:   limit,
 	})
 	if err != nil {
 		return nil, err

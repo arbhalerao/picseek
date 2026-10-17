@@ -13,7 +13,7 @@ import (
 const (
 	clipScale = 100.0
 	textScale = 10.0
-	minProb   = 0.3
+	scheme    = "best-label-with-probability"
 )
 
 type Label struct {
@@ -57,6 +57,7 @@ type Classifier struct {
 func New(ctx context.Context, e Embedder) (*Classifier, error) {
 	c := &Classifier{visual: make([][][]float32, len(Labels)), textual: make([][][]float32, len(Labels))}
 	h := sha256.New()
+	h.Write([]byte(scheme))
 	for i, l := range Labels {
 		vectors, clipVersion, err := e.EmbedClipTexts(ctx, l.Visual)
 		if err != nil {
@@ -104,11 +105,7 @@ func (c *Classifier) Classify(in store.ClassifyInput) store.ImageType {
 			top = i
 		}
 	}
-	result := store.ImageType{ImageID: in.ImageID, Score: probs[top]}
-	if probs[top] >= minProb {
-		result.Type = Labels[top].Name
-	}
-	return result
+	return store.ImageType{ImageID: in.ImageID, Type: Labels[top].Name, Score: probs[top]}
 }
 
 func best(v []float32, prompts [][]float32) float64 {

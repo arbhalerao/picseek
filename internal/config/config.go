@@ -36,6 +36,7 @@ type Search struct {
 	SemanticMargin float64 `toml:"semantic_margin"`
 	VisualMin      float64 `toml:"visual_min"`
 	VisualMargin   float64 `toml:"visual_margin"`
+	TypeMin        float64 `toml:"type_min"`
 }
 
 type Services struct {
@@ -60,6 +61,7 @@ func Default() Config {
 			SemanticMargin: 0.15,
 			VisualMin:      0.025,
 			VisualMargin:   0.02,
+			TypeMin:        0.3,
 		},
 		Services: Services{
 			SocketDir: filepath.Join(runtimeDir(), "picseek"),
@@ -141,12 +143,15 @@ func (c Config) validate() error {
 	for name, v := range map[string]float64{
 		"search.semantic_min":    c.Search.SemanticMin,
 		"search.semantic_margin": c.Search.SemanticMargin,
-		"search.visual_min":      c.Search.VisualMin,
 		"search.visual_margin":   c.Search.VisualMargin,
+		"search.type_min":        c.Search.TypeMin,
 	} {
 		if v < 0 || v > 1 {
 			errs = append(errs, fmt.Errorf("%s must be between 0 and 1", name))
 		}
+	}
+	if c.Search.VisualMin < -1 || c.Search.VisualMin > 1 {
+		errs = append(errs, errors.New("search.visual_min must be between -1 and 1"))
 	}
 	if c.Services.SocketDir == "" {
 		errs = append(errs, errors.New("services.socket_dir must not be empty"))

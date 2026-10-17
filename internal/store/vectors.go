@@ -38,6 +38,7 @@ type VectorQuery struct {
 	After     time.Time
 	Before    time.Time
 	Type      string
+	TypeMin   float64
 	Keep      func(text string) bool
 	Min       float64
 	Margin    float64
@@ -243,8 +244,8 @@ func (s *Store) searchVectors(ctx context.Context, q VectorQuery, base string) (
 		args = append(args, q.Before.Unix())
 	}
 	if q.Type != "" {
-		b.WriteString(` AND i.type = ?`)
-		args = append(args, q.Type)
+		b.WriteString(` AND i.type = ? AND i.type_score >= ?`)
+		args = append(args, q.Type, q.TypeMin)
 	}
 	if q.Folder != "" {
 		b.WriteString(` AND EXISTS (SELECT 1 FROM paths p WHERE p.image_id = i.id AND p.dir LIKE ? ESCAPE '\')`)

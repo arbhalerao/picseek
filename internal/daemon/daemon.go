@@ -92,7 +92,7 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Daemon, err
 	d.enrich = pipeline.NewEmbedStage(st, d.embed, log)
 	semantic := search.Threshold{Min: cfg.Search.SemanticMin, Margin: cfg.Search.SemanticMargin}
 	visual := search.Threshold{Min: cfg.Search.VisualMin, Margin: cfg.Search.VisualMargin}
-	d.engine = search.NewEngine(st,
+	d.engine = search.NewEngine(st, cfg.Search.TypeMin,
 		search.Layer{Kind: search.MatchExact, Retriever: search.NewExactRetriever(st)},
 		search.Layer{Kind: search.MatchNear, Retriever: search.NewNearRetriever(st)},
 		search.Layer{Kind: search.MatchMeaning, Retriever: search.NewSemanticRetriever(st, d.embed, semantic)},
