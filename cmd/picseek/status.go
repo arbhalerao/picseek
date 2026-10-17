@@ -28,7 +28,11 @@ func (a *app) statusCommand() *cobra.Command {
 			st := resp.GetStatus()
 			fmt.Printf("%-9s running\n", "seekd")
 			for _, svc := range st.GetServices() {
-				fmt.Printf("%-9s %d/%d workers healthy\n", svc.GetName(), svc.GetHealthy(), svc.GetTotal())
+				state := fmt.Sprintf("%d/%d workers healthy", svc.GetHealthy(), svc.GetTotal())
+				if svc.GetTotal() == 1 {
+					state = map[bool]string{true: "healthy", false: "unavailable"}[svc.GetHealthy() == 1]
+				}
+				fmt.Printf("%-9s %s\n", svc.GetName(), state)
 			}
 			for i, f := range st.GetFolders() {
 				label := ""
@@ -40,6 +44,7 @@ func (a *app) statusCommand() *cobra.Command {
 			queued := st.GetQueuedLive() + st.GetQueuedBackfill()
 			fmt.Printf("%-9s %d\n", "indexed", st.GetIndexed())
 			fmt.Printf("%-9s %d (new %d, backfill %d)\n", "queued", queued, st.GetQueuedLive(), st.GetQueuedBackfill())
+			fmt.Printf("%-9s %d (embeddings and classification, after OCR)\n", "enriching", st.GetQueuedEnrich())
 			fmt.Printf("%-9s %d\n", "failed", st.GetFailed())
 			if st.GetSkipped() > 0 {
 				fmt.Printf("%-9s %d (larger than index.max_file_mb)\n", "skipped", st.GetSkipped())

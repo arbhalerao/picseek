@@ -48,7 +48,7 @@ class ServiceHealth(_message.Message):
     def __init__(self, name: _Optional[str] = ..., healthy: _Optional[int] = ..., total: _Optional[int] = ...) -> None: ...
 
 class Status(_message.Message):
-    __slots__ = ("folders", "indexed", "queued_live", "queued_backfill", "failed", "images_per_second", "eta", "services", "skipped")
+    __slots__ = ("folders", "indexed", "queued_live", "queued_backfill", "failed", "images_per_second", "eta", "services", "skipped", "queued_enrich")
     FOLDERS_FIELD_NUMBER: _ClassVar[int]
     INDEXED_FIELD_NUMBER: _ClassVar[int]
     QUEUED_LIVE_FIELD_NUMBER: _ClassVar[int]
@@ -58,6 +58,7 @@ class Status(_message.Message):
     ETA_FIELD_NUMBER: _ClassVar[int]
     SERVICES_FIELD_NUMBER: _ClassVar[int]
     SKIPPED_FIELD_NUMBER: _ClassVar[int]
+    QUEUED_ENRICH_FIELD_NUMBER: _ClassVar[int]
     folders: _containers.RepeatedScalarFieldContainer[str]
     indexed: int
     queued_live: int
@@ -67,7 +68,8 @@ class Status(_message.Message):
     eta: _duration_pb2.Duration
     services: _containers.RepeatedCompositeFieldContainer[ServiceHealth]
     skipped: int
-    def __init__(self, folders: _Optional[_Iterable[str]] = ..., indexed: _Optional[int] = ..., queued_live: _Optional[int] = ..., queued_backfill: _Optional[int] = ..., failed: _Optional[int] = ..., images_per_second: _Optional[float] = ..., eta: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., services: _Optional[_Iterable[_Union[ServiceHealth, _Mapping]]] = ..., skipped: _Optional[int] = ...) -> None: ...
+    queued_enrich: int
+    def __init__(self, folders: _Optional[_Iterable[str]] = ..., indexed: _Optional[int] = ..., queued_live: _Optional[int] = ..., queued_backfill: _Optional[int] = ..., failed: _Optional[int] = ..., images_per_second: _Optional[float] = ..., eta: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., services: _Optional[_Iterable[_Union[ServiceHealth, _Mapping]]] = ..., skipped: _Optional[int] = ..., queued_enrich: _Optional[int] = ...) -> None: ...
 
 class AddFoldersRequest(_message.Message):
     __slots__ = ("paths",)
@@ -104,12 +106,14 @@ class RetryFailedResponse(_message.Message):
     def __init__(self, requeued: _Optional[int] = ...) -> None: ...
 
 class SearchRequest(_message.Message):
-    __slots__ = ("query", "limit")
+    __slots__ = ("query", "limit", "layers")
     QUERY_FIELD_NUMBER: _ClassVar[int]
     LIMIT_FIELD_NUMBER: _ClassVar[int]
+    LAYERS_FIELD_NUMBER: _ClassVar[int]
     query: str
     limit: int
-    def __init__(self, query: _Optional[str] = ..., limit: _Optional[int] = ...) -> None: ...
+    layers: _containers.RepeatedScalarFieldContainer[MatchKind]
+    def __init__(self, query: _Optional[str] = ..., limit: _Optional[int] = ..., layers: _Optional[_Iterable[_Union[MatchKind, str]]] = ...) -> None: ...
 
 class SearchResponse(_message.Message):
     __slots__ = ("hits", "took")

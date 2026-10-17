@@ -25,7 +25,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cpicseek/seekd/v1/seekd.proto\x12\x10picseek.seekd.v1\x1a\x1egoogle/protobuf/duration.proto\"\xab\x01\n\x03Hit\x12\x12\n\x04path\x18\x01 \x01(\tR\x04path\x12\x12\n\x04rank\x18\x02 \x01(\x05R\x04rank\x12/\n\x04\x62\x65st\x18\x03 \x01(\x0e\x32\x1b.picseek.seekd.v1.MatchKindR\x04\x62\x65st\x12\x35\n\x07matches\x18\x04 \x03(\x0e\x32\x1b.picseek.seekd.v1.MatchKindR\x07matches\x12\x14\n\x05score\x18\x05 \x01(\x01R\x05score\"S\n\rServiceHealth\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n\x07healthy\x18\x02 \x01(\x05R\x07healthy\x12\x14\n\x05total\x18\x03 \x01(\x05R\x05total\"\xce\x02\n\x06Status\x12\x18\n\x07\x66olders\x18\x01 \x03(\tR\x07\x66olders\x12\x18\n\x07indexed\x18\x02 \x01(\x03R\x07indexed\x12\x1f\n\x0bqueued_live\x18\x03 \x01(\x03R\nqueuedLive\x12\'\n\x0fqueued_backfill\x18\x04 \x01(\x03R\x0equeuedBackfill\x12\x16\n\x06\x66\x61iled\x18\x05 \x01(\x03R\x06\x66\x61iled\x12*\n\x11images_per_second\x18\x06 \x01(\x01R\x0fimagesPerSecond\x12+\n\x03\x65ta\x18\x07 \x01(\x0b\x32\x19.google.protobuf.DurationR\x03\x65ta\x12;\n\x08services\x18\x08 \x03(\x0b\x32\x1f.picseek.seekd.v1.ServiceHealthR\x08services\x12\x18\n\x07skipped\x18\t \x01(\x03R\x07skipped\")\n\x11\x41\x64\x64\x46oldersRequest\x12\x14\n\x05paths\x18\x01 \x03(\tR\x05paths\"*\n\x12\x41\x64\x64\x46oldersResponse\x12\x14\n\x05\x61\x64\x64\x65\x64\x18\x01 \x03(\tR\x05\x61\x64\x64\x65\x64\")\n\x13\x46orgetFolderRequest\x12\x12\n\x04path\x18\x01 \x01(\tR\x04path\";\n\x14\x46orgetFolderResponse\x12#\n\rremoved_paths\x18\x01 \x01(\x03R\x0cremovedPaths\"\x14\n\x12RetryFailedRequest\"1\n\x13RetryFailedResponse\x12\x1a\n\x08requeued\x18\x01 \x01(\x03R\x08requeued\";\n\rSearchRequest\x12\x14\n\x05query\x18\x01 \x01(\tR\x05query\x12\x14\n\x05limit\x18\x02 \x01(\x05R\x05limit\"j\n\x0eSearchResponse\x12)\n\x04hits\x18\x01 \x03(\x0b\x32\x15.picseek.seekd.v1.HitR\x04hits\x12-\n\x04took\x18\x02 \x01(\x0b\x32\x19.google.protobuf.DurationR\x04took\"\x0f\n\rStatusRequest\"B\n\x0eStatusResponse\x12\x30\n\x06status\x18\x01 \x01(\x0b\x32\x18.picseek.seekd.v1.StatusR\x06status\"\x14\n\x12WatchStatusRequest\"G\n\x13WatchStatusResponse\x12\x30\n\x06status\x18\x01 \x01(\x0b\x32\x18.picseek.seekd.v1.StatusR\x06status*\x81\x01\n\tMatchKind\x12\x1a\n\x16MATCH_KIND_UNSPECIFIED\x10\x00\x12\x14\n\x10MATCH_KIND_EXACT\x10\x01\x12\x13\n\x0fMATCH_KIND_NEAR\x10\x02\x12\x16\n\x12MATCH_KIND_MEANING\x10\x03\x12\x15\n\x11MATCH_KIND_VISUAL\x10\x04\x32\x9a\x04\n\x0cSeekdService\x12W\n\nAddFolders\x12#.picseek.seekd.v1.AddFoldersRequest\x1a$.picseek.seekd.v1.AddFoldersResponse\x12]\n\x0c\x46orgetFolder\x12%.picseek.seekd.v1.ForgetFolderRequest\x1a&.picseek.seekd.v1.ForgetFolderResponse\x12Z\n\x0bRetryFailed\x12$.picseek.seekd.v1.RetryFailedRequest\x1a%.picseek.seekd.v1.RetryFailedResponse\x12K\n\x06Search\x12\x1f.picseek.seekd.v1.SearchRequest\x1a .picseek.seekd.v1.SearchResponse\x12K\n\x06Status\x12\x1f.picseek.seekd.v1.StatusRequest\x1a .picseek.seekd.v1.StatusResponse\x12\\\n\x0bWatchStatus\x12$.picseek.seekd.v1.WatchStatusRequest\x1a%.picseek.seekd.v1.WatchStatusResponse0\x01\x42\xc3\x01\n\x14\x63om.picseek.seekd.v1B\nSeekdProtoP\x01Z=github.com/arbhalerao/picseek/gen/go/picseek/seekd/v1;seekdv1\xa2\x02\x03PSX\xaa\x02\x10Picseek.Seekd.V1\xca\x02\x10Picseek\\Seekd\\V1\xe2\x02\x1cPicseek\\Seekd\\V1\\GPBMetadata\xea\x02\x12Picseek::Seekd::V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1cpicseek/seekd/v1/seekd.proto\x12\x10picseek.seekd.v1\x1a\x1egoogle/protobuf/duration.proto\"\xab\x01\n\x03Hit\x12\x12\n\x04path\x18\x01 \x01(\tR\x04path\x12\x12\n\x04rank\x18\x02 \x01(\x05R\x04rank\x12/\n\x04\x62\x65st\x18\x03 \x01(\x0e\x32\x1b.picseek.seekd.v1.MatchKindR\x04\x62\x65st\x12\x35\n\x07matches\x18\x04 \x03(\x0e\x32\x1b.picseek.seekd.v1.MatchKindR\x07matches\x12\x14\n\x05score\x18\x05 \x01(\x01R\x05score\"S\n\rServiceHealth\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n\x07healthy\x18\x02 \x01(\x05R\x07healthy\x12\x14\n\x05total\x18\x03 \x01(\x05R\x05total\"\xf3\x02\n\x06Status\x12\x18\n\x07\x66olders\x18\x01 \x03(\tR\x07\x66olders\x12\x18\n\x07indexed\x18\x02 \x01(\x03R\x07indexed\x12\x1f\n\x0bqueued_live\x18\x03 \x01(\x03R\nqueuedLive\x12\'\n\x0fqueued_backfill\x18\x04 \x01(\x03R\x0equeuedBackfill\x12\x16\n\x06\x66\x61iled\x18\x05 \x01(\x03R\x06\x66\x61iled\x12*\n\x11images_per_second\x18\x06 \x01(\x01R\x0fimagesPerSecond\x12+\n\x03\x65ta\x18\x07 \x01(\x0b\x32\x19.google.protobuf.DurationR\x03\x65ta\x12;\n\x08services\x18\x08 \x03(\x0b\x32\x1f.picseek.seekd.v1.ServiceHealthR\x08services\x12\x18\n\x07skipped\x18\t \x01(\x03R\x07skipped\x12#\n\rqueued_enrich\x18\n \x01(\x03R\x0cqueuedEnrich\")\n\x11\x41\x64\x64\x46oldersRequest\x12\x14\n\x05paths\x18\x01 \x03(\tR\x05paths\"*\n\x12\x41\x64\x64\x46oldersResponse\x12\x14\n\x05\x61\x64\x64\x65\x64\x18\x01 \x03(\tR\x05\x61\x64\x64\x65\x64\")\n\x13\x46orgetFolderRequest\x12\x12\n\x04path\x18\x01 \x01(\tR\x04path\";\n\x14\x46orgetFolderResponse\x12#\n\rremoved_paths\x18\x01 \x01(\x03R\x0cremovedPaths\"\x14\n\x12RetryFailedRequest\"1\n\x13RetryFailedResponse\x12\x1a\n\x08requeued\x18\x01 \x01(\x03R\x08requeued\"p\n\rSearchRequest\x12\x14\n\x05query\x18\x01 \x01(\tR\x05query\x12\x14\n\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x33\n\x06layers\x18\x03 \x03(\x0e\x32\x1b.picseek.seekd.v1.MatchKindR\x06layers\"j\n\x0eSearchResponse\x12)\n\x04hits\x18\x01 \x03(\x0b\x32\x15.picseek.seekd.v1.HitR\x04hits\x12-\n\x04took\x18\x02 \x01(\x0b\x32\x19.google.protobuf.DurationR\x04took\"\x0f\n\rStatusRequest\"B\n\x0eStatusResponse\x12\x30\n\x06status\x18\x01 \x01(\x0b\x32\x18.picseek.seekd.v1.StatusR\x06status\"\x14\n\x12WatchStatusRequest\"G\n\x13WatchStatusResponse\x12\x30\n\x06status\x18\x01 \x01(\x0b\x32\x18.picseek.seekd.v1.StatusR\x06status*\x81\x01\n\tMatchKind\x12\x1a\n\x16MATCH_KIND_UNSPECIFIED\x10\x00\x12\x14\n\x10MATCH_KIND_EXACT\x10\x01\x12\x13\n\x0fMATCH_KIND_NEAR\x10\x02\x12\x16\n\x12MATCH_KIND_MEANING\x10\x03\x12\x15\n\x11MATCH_KIND_VISUAL\x10\x04\x32\x9a\x04\n\x0cSeekdService\x12W\n\nAddFolders\x12#.picseek.seekd.v1.AddFoldersRequest\x1a$.picseek.seekd.v1.AddFoldersResponse\x12]\n\x0c\x46orgetFolder\x12%.picseek.seekd.v1.ForgetFolderRequest\x1a&.picseek.seekd.v1.ForgetFolderResponse\x12Z\n\x0bRetryFailed\x12$.picseek.seekd.v1.RetryFailedRequest\x1a%.picseek.seekd.v1.RetryFailedResponse\x12K\n\x06Search\x12\x1f.picseek.seekd.v1.SearchRequest\x1a .picseek.seekd.v1.SearchResponse\x12K\n\x06Status\x12\x1f.picseek.seekd.v1.StatusRequest\x1a .picseek.seekd.v1.StatusResponse\x12\\\n\x0bWatchStatus\x12$.picseek.seekd.v1.WatchStatusRequest\x1a%.picseek.seekd.v1.WatchStatusResponse0\x01\x42\xc3\x01\n\x14\x63om.picseek.seekd.v1B\nSeekdProtoP\x01Z=github.com/arbhalerao/picseek/gen/go/picseek/seekd/v1;seekdv1\xa2\x02\x03PSX\xaa\x02\x10Picseek.Seekd.V1\xca\x02\x10Picseek\\Seekd\\V1\xe2\x02\x1cPicseek\\Seekd\\V1\\GPBMetadata\xea\x02\x12Picseek::Seekd::V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,38 +33,38 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'picseek.seekd.v1.seekd_pb2'
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\024com.picseek.seekd.v1B\nSeekdProtoP\001Z=github.com/arbhalerao/picseek/gen/go/picseek/seekd/v1;seekdv1\242\002\003PSX\252\002\020Picseek.Seekd.V1\312\002\020Picseek\\Seekd\\V1\342\002\034Picseek\\Seekd\\V1\\GPBMetadata\352\002\022Picseek::Seekd::V1'
-  _globals['_MATCHKIND']._serialized_start=1292
-  _globals['_MATCHKIND']._serialized_end=1421
+  _globals['_MATCHKIND']._serialized_start=1382
+  _globals['_MATCHKIND']._serialized_end=1511
   _globals['_HIT']._serialized_start=83
   _globals['_HIT']._serialized_end=254
   _globals['_SERVICEHEALTH']._serialized_start=256
   _globals['_SERVICEHEALTH']._serialized_end=339
   _globals['_STATUS']._serialized_start=342
-  _globals['_STATUS']._serialized_end=676
-  _globals['_ADDFOLDERSREQUEST']._serialized_start=678
-  _globals['_ADDFOLDERSREQUEST']._serialized_end=719
-  _globals['_ADDFOLDERSRESPONSE']._serialized_start=721
-  _globals['_ADDFOLDERSRESPONSE']._serialized_end=763
-  _globals['_FORGETFOLDERREQUEST']._serialized_start=765
-  _globals['_FORGETFOLDERREQUEST']._serialized_end=806
-  _globals['_FORGETFOLDERRESPONSE']._serialized_start=808
-  _globals['_FORGETFOLDERRESPONSE']._serialized_end=867
-  _globals['_RETRYFAILEDREQUEST']._serialized_start=869
-  _globals['_RETRYFAILEDREQUEST']._serialized_end=889
-  _globals['_RETRYFAILEDRESPONSE']._serialized_start=891
-  _globals['_RETRYFAILEDRESPONSE']._serialized_end=940
-  _globals['_SEARCHREQUEST']._serialized_start=942
-  _globals['_SEARCHREQUEST']._serialized_end=1001
-  _globals['_SEARCHRESPONSE']._serialized_start=1003
-  _globals['_SEARCHRESPONSE']._serialized_end=1109
-  _globals['_STATUSREQUEST']._serialized_start=1111
-  _globals['_STATUSREQUEST']._serialized_end=1126
-  _globals['_STATUSRESPONSE']._serialized_start=1128
-  _globals['_STATUSRESPONSE']._serialized_end=1194
-  _globals['_WATCHSTATUSREQUEST']._serialized_start=1196
-  _globals['_WATCHSTATUSREQUEST']._serialized_end=1216
-  _globals['_WATCHSTATUSRESPONSE']._serialized_start=1218
-  _globals['_WATCHSTATUSRESPONSE']._serialized_end=1289
-  _globals['_SEEKDSERVICE']._serialized_start=1424
-  _globals['_SEEKDSERVICE']._serialized_end=1962
+  _globals['_STATUS']._serialized_end=713
+  _globals['_ADDFOLDERSREQUEST']._serialized_start=715
+  _globals['_ADDFOLDERSREQUEST']._serialized_end=756
+  _globals['_ADDFOLDERSRESPONSE']._serialized_start=758
+  _globals['_ADDFOLDERSRESPONSE']._serialized_end=800
+  _globals['_FORGETFOLDERREQUEST']._serialized_start=802
+  _globals['_FORGETFOLDERREQUEST']._serialized_end=843
+  _globals['_FORGETFOLDERRESPONSE']._serialized_start=845
+  _globals['_FORGETFOLDERRESPONSE']._serialized_end=904
+  _globals['_RETRYFAILEDREQUEST']._serialized_start=906
+  _globals['_RETRYFAILEDREQUEST']._serialized_end=926
+  _globals['_RETRYFAILEDRESPONSE']._serialized_start=928
+  _globals['_RETRYFAILEDRESPONSE']._serialized_end=977
+  _globals['_SEARCHREQUEST']._serialized_start=979
+  _globals['_SEARCHREQUEST']._serialized_end=1091
+  _globals['_SEARCHRESPONSE']._serialized_start=1093
+  _globals['_SEARCHRESPONSE']._serialized_end=1199
+  _globals['_STATUSREQUEST']._serialized_start=1201
+  _globals['_STATUSREQUEST']._serialized_end=1216
+  _globals['_STATUSRESPONSE']._serialized_start=1218
+  _globals['_STATUSRESPONSE']._serialized_end=1284
+  _globals['_WATCHSTATUSREQUEST']._serialized_start=1286
+  _globals['_WATCHSTATUSREQUEST']._serialized_end=1306
+  _globals['_WATCHSTATUSRESPONSE']._serialized_start=1308
+  _globals['_WATCHSTATUSRESPONSE']._serialized_end=1379
+  _globals['_SEEKDSERVICE']._serialized_start=1514
+  _globals['_SEEKDSERVICE']._serialized_end=2052
 # @@protoc_insertion_point(module_scope)

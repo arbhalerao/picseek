@@ -50,7 +50,11 @@ func (s *Server) RetryFailed(ctx context.Context, _ *seekdv1.RetryFailedRequest)
 }
 
 func (s *Server) Search(ctx context.Context, req *seekdv1.SearchRequest) (*seekdv1.SearchResponse, error) {
-	result, err := s.daemon.Search(ctx, req.GetQuery(), int(req.GetLimit()))
+	layers := make([]search.MatchKind, 0, len(req.GetLayers()))
+	for _, l := range req.GetLayers() {
+		layers = append(layers, fromMatchKind(l))
+	}
+	result, err := s.daemon.Search(ctx, req.GetQuery(), int(req.GetLimit()), layers)
 	if err != nil {
 		return nil, toStatus(err)
 	}
@@ -106,8 +110,10 @@ func (s *Server) status(ctx context.Context) (*seekdv1.Status, error) {
 		ImagesPerSecond: st.Rate,
 		Eta:             durationpb.New(st.ETA),
 		Skipped:         st.Skipped,
+		QueuedEnrich:    st.Counts.QueuedEnrich,
 		Services: []*seekdv1.ServiceHealth{
 			{Name: "ocr", Healthy: int32(st.OCRHealthy), Total: int32(st.OCRTotal)},
+			{Name: "embed", Healthy: boolInt(st.EmbedHealthy), Total: 1},
 		},
 	}, nil
 }
@@ -125,6 +131,26 @@ func matchKind(k search.MatchKind) seekdv1.MatchKind {
 	default:
 		return seekdv1.MatchKind_MATCH_KIND_UNSPECIFIED
 	}
+}
+
+func fromMatchKind(k seekdv1.MatchKind) search.MatchKind {
+	switch k {
+	case seekdv1.MatchKind_MATCH_KIND_NEAR:
+		return search.MatchNear
+	case seekdv1.MatchKind_MATCH_KIND_MEANING:
+		return search.MatchMeaning
+	case seekdv1.MatchKind_MATCH_KIND_VISUAL:
+		return search.MatchVisual
+	default:
+		return search.MatchExact
+	}
+}
+
+func boolInt(b bool) int32 {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 func toStatus(err error) error {

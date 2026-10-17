@@ -224,6 +224,7 @@ type Status struct {
 	Eta             *durationpb.Duration   `protobuf:"bytes,7,opt,name=eta,proto3" json:"eta,omitempty"`
 	Services        []*ServiceHealth       `protobuf:"bytes,8,rep,name=services,proto3" json:"services,omitempty"`
 	Skipped         int64                  `protobuf:"varint,9,opt,name=skipped,proto3" json:"skipped,omitempty"`
+	QueuedEnrich    int64                  `protobuf:"varint,10,opt,name=queued_enrich,json=queuedEnrich,proto3" json:"queued_enrich,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -317,6 +318,13 @@ func (x *Status) GetServices() []*ServiceHealth {
 func (x *Status) GetSkipped() int64 {
 	if x != nil {
 		return x.Skipped
+	}
+	return 0
+}
+
+func (x *Status) GetQueuedEnrich() int64 {
+	if x != nil {
+		return x.QueuedEnrich
 	}
 	return 0
 }
@@ -581,6 +589,7 @@ type SearchRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
 	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Layers        []MatchKind            `protobuf:"varint,3,rep,packed,name=layers,proto3,enum=picseek.seekd.v1.MatchKind" json:"layers,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -627,6 +636,13 @@ func (x *SearchRequest) GetLimit() int32 {
 		return x.Limit
 	}
 	return 0
+}
+
+func (x *SearchRequest) GetLayers() []MatchKind {
+	if x != nil {
+		return x.Layers
+	}
+	return nil
 }
 
 type SearchResponse struct {
@@ -855,7 +871,7 @@ const file_picseek_seekd_v1_seekd_proto_rawDesc = "" +
 	"\rServiceHealth\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
 	"\ahealthy\x18\x02 \x01(\x05R\ahealthy\x12\x14\n" +
-	"\x05total\x18\x03 \x01(\x05R\x05total\"\xce\x02\n" +
+	"\x05total\x18\x03 \x01(\x05R\x05total\"\xf3\x02\n" +
 	"\x06Status\x12\x18\n" +
 	"\afolders\x18\x01 \x03(\tR\afolders\x12\x18\n" +
 	"\aindexed\x18\x02 \x01(\x03R\aindexed\x12\x1f\n" +
@@ -866,7 +882,9 @@ const file_picseek_seekd_v1_seekd_proto_rawDesc = "" +
 	"\x11images_per_second\x18\x06 \x01(\x01R\x0fimagesPerSecond\x12+\n" +
 	"\x03eta\x18\a \x01(\v2\x19.google.protobuf.DurationR\x03eta\x12;\n" +
 	"\bservices\x18\b \x03(\v2\x1f.picseek.seekd.v1.ServiceHealthR\bservices\x12\x18\n" +
-	"\askipped\x18\t \x01(\x03R\askipped\")\n" +
+	"\askipped\x18\t \x01(\x03R\askipped\x12#\n" +
+	"\rqueued_enrich\x18\n" +
+	" \x01(\x03R\fqueuedEnrich\")\n" +
 	"\x11AddFoldersRequest\x12\x14\n" +
 	"\x05paths\x18\x01 \x03(\tR\x05paths\"*\n" +
 	"\x12AddFoldersResponse\x12\x14\n" +
@@ -877,10 +895,11 @@ const file_picseek_seekd_v1_seekd_proto_rawDesc = "" +
 	"\rremoved_paths\x18\x01 \x01(\x03R\fremovedPaths\"\x14\n" +
 	"\x12RetryFailedRequest\"1\n" +
 	"\x13RetryFailedResponse\x12\x1a\n" +
-	"\brequeued\x18\x01 \x01(\x03R\brequeued\";\n" +
+	"\brequeued\x18\x01 \x01(\x03R\brequeued\"p\n" +
 	"\rSearchRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"j\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x123\n" +
+	"\x06layers\x18\x03 \x03(\x0e2\x1b.picseek.seekd.v1.MatchKindR\x06layers\"j\n" +
 	"\x0eSearchResponse\x12)\n" +
 	"\x04hits\x18\x01 \x03(\v2\x15.picseek.seekd.v1.HitR\x04hits\x12-\n" +
 	"\x04took\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\x04took\"\x0f\n" +
@@ -945,27 +964,28 @@ var file_picseek_seekd_v1_seekd_proto_depIdxs = []int32{
 	0,  // 1: picseek.seekd.v1.Hit.matches:type_name -> picseek.seekd.v1.MatchKind
 	16, // 2: picseek.seekd.v1.Status.eta:type_name -> google.protobuf.Duration
 	2,  // 3: picseek.seekd.v1.Status.services:type_name -> picseek.seekd.v1.ServiceHealth
-	1,  // 4: picseek.seekd.v1.SearchResponse.hits:type_name -> picseek.seekd.v1.Hit
-	16, // 5: picseek.seekd.v1.SearchResponse.took:type_name -> google.protobuf.Duration
-	3,  // 6: picseek.seekd.v1.StatusResponse.status:type_name -> picseek.seekd.v1.Status
-	3,  // 7: picseek.seekd.v1.WatchStatusResponse.status:type_name -> picseek.seekd.v1.Status
-	4,  // 8: picseek.seekd.v1.SeekdService.AddFolders:input_type -> picseek.seekd.v1.AddFoldersRequest
-	6,  // 9: picseek.seekd.v1.SeekdService.ForgetFolder:input_type -> picseek.seekd.v1.ForgetFolderRequest
-	8,  // 10: picseek.seekd.v1.SeekdService.RetryFailed:input_type -> picseek.seekd.v1.RetryFailedRequest
-	10, // 11: picseek.seekd.v1.SeekdService.Search:input_type -> picseek.seekd.v1.SearchRequest
-	12, // 12: picseek.seekd.v1.SeekdService.Status:input_type -> picseek.seekd.v1.StatusRequest
-	14, // 13: picseek.seekd.v1.SeekdService.WatchStatus:input_type -> picseek.seekd.v1.WatchStatusRequest
-	5,  // 14: picseek.seekd.v1.SeekdService.AddFolders:output_type -> picseek.seekd.v1.AddFoldersResponse
-	7,  // 15: picseek.seekd.v1.SeekdService.ForgetFolder:output_type -> picseek.seekd.v1.ForgetFolderResponse
-	9,  // 16: picseek.seekd.v1.SeekdService.RetryFailed:output_type -> picseek.seekd.v1.RetryFailedResponse
-	11, // 17: picseek.seekd.v1.SeekdService.Search:output_type -> picseek.seekd.v1.SearchResponse
-	13, // 18: picseek.seekd.v1.SeekdService.Status:output_type -> picseek.seekd.v1.StatusResponse
-	15, // 19: picseek.seekd.v1.SeekdService.WatchStatus:output_type -> picseek.seekd.v1.WatchStatusResponse
-	14, // [14:20] is the sub-list for method output_type
-	8,  // [8:14] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	0,  // 4: picseek.seekd.v1.SearchRequest.layers:type_name -> picseek.seekd.v1.MatchKind
+	1,  // 5: picseek.seekd.v1.SearchResponse.hits:type_name -> picseek.seekd.v1.Hit
+	16, // 6: picseek.seekd.v1.SearchResponse.took:type_name -> google.protobuf.Duration
+	3,  // 7: picseek.seekd.v1.StatusResponse.status:type_name -> picseek.seekd.v1.Status
+	3,  // 8: picseek.seekd.v1.WatchStatusResponse.status:type_name -> picseek.seekd.v1.Status
+	4,  // 9: picseek.seekd.v1.SeekdService.AddFolders:input_type -> picseek.seekd.v1.AddFoldersRequest
+	6,  // 10: picseek.seekd.v1.SeekdService.ForgetFolder:input_type -> picseek.seekd.v1.ForgetFolderRequest
+	8,  // 11: picseek.seekd.v1.SeekdService.RetryFailed:input_type -> picseek.seekd.v1.RetryFailedRequest
+	10, // 12: picseek.seekd.v1.SeekdService.Search:input_type -> picseek.seekd.v1.SearchRequest
+	12, // 13: picseek.seekd.v1.SeekdService.Status:input_type -> picseek.seekd.v1.StatusRequest
+	14, // 14: picseek.seekd.v1.SeekdService.WatchStatus:input_type -> picseek.seekd.v1.WatchStatusRequest
+	5,  // 15: picseek.seekd.v1.SeekdService.AddFolders:output_type -> picseek.seekd.v1.AddFoldersResponse
+	7,  // 16: picseek.seekd.v1.SeekdService.ForgetFolder:output_type -> picseek.seekd.v1.ForgetFolderResponse
+	9,  // 17: picseek.seekd.v1.SeekdService.RetryFailed:output_type -> picseek.seekd.v1.RetryFailedResponse
+	11, // 18: picseek.seekd.v1.SeekdService.Search:output_type -> picseek.seekd.v1.SearchResponse
+	13, // 19: picseek.seekd.v1.SeekdService.Status:output_type -> picseek.seekd.v1.StatusResponse
+	15, // 20: picseek.seekd.v1.SeekdService.WatchStatus:output_type -> picseek.seekd.v1.WatchStatusResponse
+	15, // [15:21] is the sub-list for method output_type
+	9,  // [9:15] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_picseek_seekd_v1_seekd_proto_init() }

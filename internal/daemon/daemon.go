@@ -13,6 +13,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/arbhalerao/picseek/internal/config"
+	"github.com/arbhalerao/picseek/internal/embed"
 	"github.com/arbhalerao/picseek/internal/indexer"
 	"github.com/arbhalerao/picseek/internal/ocr"
 	"github.com/arbhalerao/picseek/internal/pipeline"
@@ -32,6 +33,8 @@ type Daemon struct {
 	watcher *indexer.Watcher
 	pool    *ocr.Pool
 	ocr     *pipeline.OCRStage
+	embed   *embed.Client
+	enrich  *pipeline.EmbedStage
 	engine  *search.Engine
 	wake    chan struct{}
 	log     *slog.Logger
@@ -80,12 +83,26 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Daemon, err
 		return nil, err
 	}
 	d.ocr = pipeline.NewOCRStage(st, d.pool, d.wake, log)
-	d.engine = search.NewEngine(st, search.NewExactRetriever(st), search.NewNearRetriever(st))
+	if d.embed, err = embed.New(cfg.SocketPath("embed"), log); err != nil {
+		d.pool.Close()
+		d.watcher.Close()
+		st.Close()
+		return nil, err
+	}
+	d.enrich = pipeline.NewEmbedStage(st, d.embed, log)
+	semantic := search.Threshold{Min: cfg.Search.SemanticMin, Margin: cfg.Search.SemanticMargin}
+	visual := search.Threshold{Min: cfg.Search.VisualMin, Margin: cfg.Search.VisualMargin}
+	d.engine = search.NewEngine(st,
+		search.Layer{Kind: search.MatchExact, Retriever: search.NewExactRetriever(st)},
+		search.Layer{Kind: search.MatchNear, Retriever: search.NewNearRetriever(st)},
+		search.Layer{Kind: search.MatchMeaning, Retriever: search.NewSemanticRetriever(st, d.embed, semantic)},
+		search.Layer{Kind: search.MatchVisual, Retriever: search.NewVisualRetriever(st, d.embed, visual)},
+	)
 	return d, nil
 }
 
 func (d *Daemon) Close() error {
-	return errors.Join(d.watcher.Close(), d.pool.Close(), d.store.Close())
+	return errors.Join(d.watcher.Close(), d.pool.Close(), d.embed.Close(), d.store.Close())
 }
 
 func (d *Daemon) Run(ctx context.Context) error {
@@ -113,6 +130,11 @@ func (d *Daemon) Run(ctx context.Context) error {
 		return nil
 	})
 	g.Go(func() error { return d.ocr.Run(gctx) })
+	g.Go(func() error {
+		d.embed.MonitorHealth(gctx)
+		return nil
+	})
+	g.Go(func() error { return d.enrich.Run(gctx) })
 	return g.Wait()
 }
 

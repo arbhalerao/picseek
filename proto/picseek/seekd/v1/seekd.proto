@@ -45,6 +45,7 @@ message Status {
   google.protobuf.Duration eta = 7;
   repeated ServiceHealth services = 8;
   int64 skipped = 9;
+  int64 queued_enrich = 10;
 }
 
 message AddFoldersRequest {
@@ -72,6 +73,7 @@ message RetryFailedResponse {
 message SearchRequest {
   string query = 1;
   int32 limit = 2;
+  repeated MatchKind layers = 3;
 }
 
 message SearchResponse {

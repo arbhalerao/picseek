@@ -24,17 +24,21 @@ type jsonHit struct {
 func (a *app) searchCommand() *cobra.Command {
 	var limit int
 	var why, paths, asJSON bool
+	var layerNames []string
 	cmd := &cobra.Command{
 		Use:   "search <query>",
 		Short: "Search indexed images",
 		Long: `Search indexed images by the text in them.
 
-Every word must appear somewhere in the image. Partial words match.
+Results come in tiers: exact text matches, near matches (OCR misreads and
+split words), then matches by meaning and by what the image shows.
+Every word must appear somewhere in the image for text matches. Partial words match.
   "exact phrase"   must appear on one line
   -word            exclude images containing word
   folder:name      folder path contains name
   on:week          today, yesterday, week, month, year, march, 2026, 2026-08, 2026-08-01
   since:/until:    same formats as on:
+  type:money       money, travel, message, dev, security, document, chart
 
 Flags may appear anywhere; any other argument starting with - is part of the query.`,
 		DisableFlagParsing: true,
@@ -59,7 +63,11 @@ Flags may appear anywhere; any other argument starting with - is part of the que
 			}
 			ctx, cancel := context.WithTimeout(cmd.Context(), callTimeout)
 			defer cancel()
-			resp, err := a.client.Search(ctx, &seekdv1.SearchRequest{Query: strings.Join(terms, " "), Limit: int32(limit)})
+			layers, err := parseLayers(layerNames)
+			if err != nil {
+				return err
+			}
+			resp, err := a.client.Search(ctx, &seekdv1.SearchRequest{Query: strings.Join(terms, " "), Limit: int32(limit), Layers: layers})
 			if err != nil {
 				return err
 			}
@@ -100,12 +108,13 @@ Flags may appear anywhere; any other argument starting with - is part of the que
 	cmd.Flags().BoolVar(&why, "why", false, "show why each file matched")
 	cmd.Flags().BoolVar(&paths, "paths", false, "print bare paths, one per line")
 	cmd.Flags().BoolVar(&asJSON, "json", false, "print results as JSON")
+	cmd.Flags().StringSliceVar(&layerNames, "layers", nil, "search only these layers: exact,near,meaning,visual")
 	cmd.Flags().BoolP("help", "h", false, "help for search")
 	return cmd
 }
 
 func splitSearchArgs(args []string) (flags, terms []string) {
-	takesValue := map[string]bool{"-n": true, "--limit": true, "--config": true}
+	takesValue := map[string]bool{"-n": true, "--limit": true, "--config": true, "--layers": true}
 	boolean := map[string]bool{"--why": true, "--paths": true, "--json": true, "-h": true, "--help": true}
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
@@ -136,6 +145,24 @@ func isDigits(s string) bool {
 		}
 	}
 	return s != ""
+}
+
+func parseLayers(names []string) ([]seekdv1.MatchKind, error) {
+	kinds := map[string]seekdv1.MatchKind{
+		"exact":   seekdv1.MatchKind_MATCH_KIND_EXACT,
+		"near":    seekdv1.MatchKind_MATCH_KIND_NEAR,
+		"meaning": seekdv1.MatchKind_MATCH_KIND_MEANING,
+		"visual":  seekdv1.MatchKind_MATCH_KIND_VISUAL,
+	}
+	layers := make([]seekdv1.MatchKind, 0, len(names))
+	for _, n := range names {
+		k, ok := kinds[strings.ToLower(strings.TrimSpace(n))]
+		if !ok {
+			return nil, fmt.Errorf("unknown layer %q (use exact, near, meaning, visual)", n)
+		}
+		layers = append(layers, k)
+	}
+	return layers, nil
 }
 
 func kindName(k seekdv1.MatchKind) string {
