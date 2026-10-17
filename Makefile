@@ -1,7 +1,7 @@
 BIN := bin
 TAGS := sqlite_fts5
 
-.PHONY: gen build run lint fmt sync clean
+.PHONY: gen build run lint fmt sync clean eval
 
 gen:
 	buf generate
@@ -24,6 +24,9 @@ lint:
 fmt:
 	golangci-lint fmt ./...
 	uv run ruff format .
+
+eval: build
+	uv run picseek-eval
 
 clean:
 	rm -rf $(BIN)

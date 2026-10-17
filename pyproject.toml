@@ -1,5 +1,5 @@
 [tool.uv.workspace]
-members = ["gen/python", "services/runtime", "services/ocr", "services/embed"]
+members = ["gen/python", "services/runtime", "services/ocr", "services/embed", "eval"]
 
 [dependency-groups]
 dev = ["ruff>=0.13"]
@@ -11,3 +11,6 @@ extend-exclude = ["gen"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"eval/src/picseek_eval/corpus.py" = ["E501"]
