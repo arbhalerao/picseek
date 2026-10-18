@@ -251,6 +251,7 @@ flowchart TB
 - **Ranking.** Results come in tiers: exact and filter matches, then near matches, then meaning and visual together, fused with reciprocal rank fusion. An image found by several layers keeps its best tier and reports every layer that found it (`--why`).
 - **Filters** are applied in SQL before any scoring. `type:` uses the label and probability stored by the classifier, with the threshold applied at query time (`search.type_min`).
 - **Layers** can be restricted per request, which is how the evaluation measures what each layer adds.
+- **Results** are not capped: every match is returned unless the request sets a limit (`-n`). The CLI saves the result paths of each search so `picseek open N` can open them by number.
 - If `embed-svc` is unavailable, meaning and visual return nothing and text search continues.
 
 ## Classification
@@ -265,15 +266,21 @@ Each image gets a type (money, travel, message, dev, security, document, chart) 
 
 ## Configuration and files
 
-| What    | Development (`make run`)                      | Default otherwise                 |
-| ------- | --------------------------------------------- | --------------------------------- |
-| Config  | `~/.config/picseek/config.toml` or `--config` | `~/.config/picseek/config.toml`   |
-| Index   | `.data/picseek/index.db`                      | `~/.local/share/picseek/index.db` |
-| Models  | `.models/`                                    | `~/.cache/picseek/models`         |
-| Sockets | `$XDG_RUNTIME_DIR/picseek/`                   | `$XDG_RUNTIME_DIR/picseek/`       |
+| What        | Development (`make run`)                      | Default otherwise                   |
+| ----------- | --------------------------------------------- | ----------------------------------- |
+| Config      | `~/.config/picseek/config.toml` or `--config` | `~/.config/picseek/config.toml`     |
+| Index       | `.data/picseek/index.db`                      | `~/.local/share/picseek/index.db`   |
+| Models      | `.models/`                                    | `~/.cache/picseek/models`           |
+| Sockets     | `$XDG_RUNTIME_DIR/picseek/`                   | `$XDG_RUNTIME_DIR/picseek/`         |
+| Last search | `~/.cache/picseek/last-search.json`           | `~/.cache/picseek/last-search.json` |
 
 Image folders are only ever read.
 
 ## Evaluation
 
 `make eval` renders a synthetic corpus of screenshots in many layouts with labelled queries, starts an isolated instance with its own sockets and data directory, records raw scores for calibration, then reports per-layer recall and MRR, off-topic results and classification accuracy. The report is written to `eval/results/synthetic.md`.
+
+## Deployment
+
+- **systemd user services** (`packaging/systemd/`): a template unit `picseek-ocr@.service` run as instances 1 to 3, `picseek-embed.service`, and `seekd.service`, which wants the others. All restart on failure; the Python services run at the lowest CPU and idle I/O priority. `scripts/install.sh` builds the binaries, syncs each Python service into its own environment from `uv.lock`, fetches the OCR models once so workers never download into the same files together, and enables the units.
+- **Containers** (`docker/`, `compose.yaml`): seekd on distroless, the Python services on `python:3.12-slim` with the OCR models built into the image, all as the same non-root user so they can share the socket volume. The image folder is mounted read-only at the same path in every container, because seekd sends paths, not bytes.

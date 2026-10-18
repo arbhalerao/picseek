@@ -45,7 +45,34 @@ bin/picseek search "boarding confirmation"
 bin/picseek status
 ```
 
-Models are downloaded on first use into `.models/`, and the index lives in `.data/`. Both are inside the repo and git-ignored.
+Models are downloaded on first use into `.models/`, and the index lives in `.data/` unless `XDG_DATA_HOME` is set. Both are inside the repo and git-ignored.
+
+## Install
+
+On Linux with systemd, from a checkout (needs Go and `uv`):
+
+```
+./scripts/install.sh
+picseek index ~/Pictures/Screenshots
+```
+
+This puts `seekd` and `picseek` in `~/.local/bin`, gives each Python service its own environment built from `uv.lock`, and runs everything as systemd user services that start at login, at low CPU and disk priority. Nothing is indexed until a folder is added. Running the script again updates an existing install.
+
+```
+systemctl --user status seekd
+journalctl --user-unit seekd
+./scripts/uninstall.sh            # keeps the index, config and models
+./scripts/uninstall.sh --purge    # removes them too
+```
+
+## Docker
+
+```
+PICSEEK_FOLDER=~/Pictures/Screenshots docker compose up -d
+docker compose exec seekd picseek search invoice
+```
+
+`PICSEEK_FOLDER` is required and is mounted read-only in every container.
 
 ## Search syntax
 
