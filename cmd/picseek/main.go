@@ -30,7 +30,7 @@ func main() {
 	a := &app{}
 	root := &cobra.Command{
 		Use:           "picseek",
-		Short:         "Search your screenshots and photos by what they say and show",
+		Short:         "Search your screenshots by what they say and show",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
