@@ -60,12 +60,24 @@ Models are downloaded on first use into `.models/`, and the index lives in `.dat
 
 Useful flags:
 
-| Flag      | Effect                   |
-| --------- | ------------------------ |
-| `-n 50`   | number of results        |
-| `--why`   | show which layer matched |
-| `--paths` | bare paths for piping    |
-| `--json`  | machine-readable output  |
+| Flag      | Effect                            |
+| --------- | --------------------------------- |
+| `-n 10`   | at most 10 results (default: all) |
+| `--why`   | show which layer matched          |
+| `--paths` | bare paths for piping             |
+| `--json`  | machine-readable output           |
+
+## Opening results
+
+Every search remembers its results, so they can be opened by number with the default image viewer:
+
+```
+picseek search visa
+picseek open 2
+picseek open 1 3
+```
+
+In terminals that support links (GNOME Terminal, Kitty, iTerm2, the VS Code terminal), the file names in the results can also be clicked.
 
 ## Search quality
 
