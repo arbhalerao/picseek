@@ -34,7 +34,8 @@ done
 
 install -m 0644 "$repo"/packaging/systemd/*.service "$unit_dir/"
 systemctl --user daemon-reload
-systemctl --user enable --now "${units[@]}"
+systemctl --user enable "${units[@]}"
+systemctl --user restart "${units[@]}"
 
 echo "picseek is installed and running."
 case ":$PATH:" in
