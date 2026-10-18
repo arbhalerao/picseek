@@ -31,7 +31,6 @@ type OCR struct {
 }
 
 type Search struct {
-	DefaultLimit   int     `toml:"default_limit"`
 	SemanticMin    float64 `toml:"semantic_min"`
 	SemanticMargin float64 `toml:"semantic_margin"`
 	VisualMin      float64 `toml:"visual_min"`
@@ -55,7 +54,6 @@ func Default() Config {
 			ThreadsPerWorker: 2,
 		},
 		Search: Search{
-			DefaultLimit:   20,
 			SemanticMin:    0.3,
 			SemanticMargin: 0.2,
 			VisualMin:      0.02,
@@ -135,9 +133,6 @@ func (c Config) validate() error {
 	}
 	if c.Index.MaxFileMB < 1 {
 		errs = append(errs, errors.New("index.max_file_mb must be at least 1"))
-	}
-	if c.Search.DefaultLimit < 1 {
-		errs = append(errs, errors.New("search.default_limit must be at least 1"))
 	}
 	for name, v := range map[string]float64{
 		"search.semantic_min":    c.Search.SemanticMin,

@@ -20,7 +20,6 @@ folders = ["{corpus}"]
 workers = 3
 
 [search]
-default_limit = 20
 semantic_min = {thresholds["semantic_min"]}
 semantic_margin = {thresholds["semantic_margin"]}
 visual_min = {thresholds["visual_min"]}

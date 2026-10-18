@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"slices"
@@ -33,7 +34,7 @@ type Status struct {
 
 func (d *Daemon) Search(ctx context.Context, raw string, limit int, layers []search.MatchKind) (search.Result, error) {
 	if limit <= 0 {
-		limit = d.cfg.Search.DefaultLimit
+		limit = math.MaxInt
 	}
 	return d.engine.Search(ctx, raw, limit, layers)
 }

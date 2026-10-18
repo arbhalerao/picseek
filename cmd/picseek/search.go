@@ -104,7 +104,7 @@ Flags may appear anywhere; any other argument starting with - is part of the que
 			return nil
 		},
 	}
-	cmd.Flags().IntVarP(&limit, "limit", "n", 0, "maximum number of results (default from config, 20)")
+	cmd.Flags().IntVarP(&limit, "limit", "n", 0, "maximum number of results (default: all)")
 	cmd.Flags().BoolVar(&why, "why", false, "show why each file matched")
 	cmd.Flags().BoolVar(&paths, "paths", false, "print bare paths, one per line")
 	cmd.Flags().BoolVar(&asJSON, "json", false, "print results as JSON")
