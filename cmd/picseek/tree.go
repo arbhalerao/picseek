@@ -22,7 +22,7 @@ func newDir(name string) *dirNode {
 	return &dirNode{name: name, children: make(map[string]*dirNode), best: 1 << 30}
 }
 
-func printTree(w io.Writer, hits []*seekdv1.Hit, why bool) {
+func printTree(w io.Writer, hits []*seekdv1.Hit, why, links bool) {
 	anchors := newDir("")
 	for _, h := range hits {
 		parts := splitPath(tildify(h.GetPath()))
@@ -56,11 +56,11 @@ func printTree(w io.Writer, hits []*seekdv1.Hit, why bool) {
 	for _, top := range tops {
 		top = collapse(top)
 		fmt.Fprintln(w, top.name)
-		printChildren(w, top, "", why)
+		printChildren(w, top, "", why, links)
 	}
 }
 
-func printChildren(w io.Writer, dir *dirNode, prefix string, why bool) {
+func printChildren(w io.Writer, dir *dirNode, prefix string, why, links bool) {
 	type entry struct {
 		rank int32
 		dir  *dirNode
@@ -81,7 +81,11 @@ func printChildren(w io.Writer, dir *dirNode, prefix string, why bool) {
 			branch, indent = "└── ", "    "
 		}
 		if e.file != nil {
-			line := fmt.Sprintf("[%d] %s", e.file.GetRank(), filepath.Base(e.file.GetPath()))
+			name := filepath.Base(e.file.GetPath())
+			if links {
+				name = hyperlink(e.file.GetPath(), name)
+			}
+			line := fmt.Sprintf("[%d] %s", e.file.GetRank(), name)
 			if why {
 				line += "  (" + kindName(e.file.GetBest()) + ")"
 			}
@@ -90,7 +94,7 @@ func printChildren(w io.Writer, dir *dirNode, prefix string, why bool) {
 		}
 		child := collapse(e.dir)
 		fmt.Fprintln(w, prefix+branch+child.name)
-		printChildren(w, child, prefix+indent, why)
+		printChildren(w, child, prefix+indent, why, links)
 	}
 }
 

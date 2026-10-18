@@ -22,7 +22,7 @@ type jsonHit struct {
 }
 
 func (a *app) searchCommand() *cobra.Command {
-	var limit int
+	var limit, open int
 	var why, paths, asJSON bool
 	var layerNames []string
 	cmd := &cobra.Command{
@@ -72,6 +72,9 @@ Flags may appear anywhere; any other argument starting with - is part of the que
 				return err
 			}
 			hits := resp.GetHits()
+			if err := saveLast(hits); err != nil {
+				fmt.Fprintln(os.Stderr, "picseek: cannot remember these results for `picseek open`:", err)
+			}
 			switch {
 			case asJSON:
 				out := make([]jsonHit, len(hits))
@@ -95,11 +98,14 @@ Flags may appear anywhere; any other argument starting with - is part of the que
 					fmt.Fprintln(os.Stderr, "no matches")
 					break
 				}
-				printTree(os.Stdout, hits, why)
+				printTree(os.Stdout, hits, why, isTerminal(os.Stdout))
 				fmt.Printf("\n%s · %s\n", summary(hits), resp.GetTook().AsDuration().Round(100_000))
 			}
 			if len(hits) == 0 {
 				return errNoResults
+			}
+			if open > 0 {
+				return openHit(hits, open)
 			}
 			return nil
 		},
@@ -109,12 +115,13 @@ Flags may appear anywhere; any other argument starting with - is part of the que
 	cmd.Flags().BoolVar(&paths, "paths", false, "print bare paths, one per line")
 	cmd.Flags().BoolVar(&asJSON, "json", false, "print results as JSON")
 	cmd.Flags().StringSliceVar(&layerNames, "layers", nil, "search only these layers: exact,near,meaning,visual")
+	cmd.Flags().IntVar(&open, "open", 0, "open result N with the default image viewer")
 	cmd.Flags().BoolP("help", "h", false, "help for search")
 	return cmd
 }
 
 func splitSearchArgs(args []string) (flags, terms []string) {
-	takesValue := map[string]bool{"-n": true, "--limit": true, "--config": true, "--layers": true}
+	takesValue := map[string]bool{"-n": true, "--limit": true, "--config": true, "--layers": true, "--open": true}
 	boolean := map[string]bool{"--why": true, "--paths": true, "--json": true, "-h": true, "--help": true}
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
@@ -136,6 +143,15 @@ func splitSearchArgs(args []string) (flags, terms []string) {
 		}
 	}
 	return flags, terms
+}
+
+func openHit(hits []*seekdv1.Hit, rank int) error {
+	for _, h := range hits {
+		if int(h.GetRank()) == rank {
+			return openFile(h.GetPath())
+		}
+	}
+	return fmt.Errorf("no result [%d]; there are %d results", rank, len(hits))
 }
 
 func isDigits(s string) bool {

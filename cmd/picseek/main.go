@@ -36,7 +36,7 @@ func main() {
 	}
 	defaultPath, _ := config.DefaultPath()
 	root.PersistentFlags().StringVar(&a.configPath, "config", defaultPath, "path to config.toml")
-	root.AddCommand(a.indexCommand(), a.searchCommand(), a.statusCommand())
+	root.AddCommand(a.indexCommand(), a.searchCommand(), a.openCommand(), a.statusCommand())
 
 	err := root.Execute()
 	if a.conn != nil {
