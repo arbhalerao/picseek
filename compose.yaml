@@ -1,0 +1,51 @@
+x-ocr: &ocr
+  build:
+    context: .
+    dockerfile: docker/services.Dockerfile
+    target: ocr
+  image: picseek-ocr
+  restart: unless-stopped
+  volumes:
+    - sockets:/run/picseek
+    - ${PICSEEK_FOLDER:?set PICSEEK_FOLDER to the folder to index}:/screenshots:ro
+
+services:
+  ocr-1:
+    <<: *ocr
+    command: ["--socket", "/run/picseek/ocr-1.sock"]
+  ocr-2:
+    <<: *ocr
+    command: ["--socket", "/run/picseek/ocr-2.sock"]
+  ocr-3:
+    <<: *ocr
+    command: ["--socket", "/run/picseek/ocr-3.sock"]
+
+  embed:
+    build:
+      context: .
+      dockerfile: docker/services.Dockerfile
+      target: embed
+    image: picseek-embed
+    restart: unless-stopped
+    command: ["--socket", "/run/picseek/embed.sock"]
+    volumes:
+      - sockets:/run/picseek
+      - models:/opt/picseek/models
+      - ${PICSEEK_FOLDER:?set PICSEEK_FOLDER to the folder to index}:/screenshots:ro
+
+  seekd:
+    build:
+      context: .
+      dockerfile: docker/seekd.Dockerfile
+    image: picseek-seekd
+    restart: unless-stopped
+    depends_on: [ocr-1, ocr-2, ocr-3, embed]
+    volumes:
+      - sockets:/run/picseek
+      - index:/data
+      - ${PICSEEK_FOLDER:?set PICSEEK_FOLDER to the folder to index}:/screenshots:ro
+
+volumes:
+  sockets:
+  models:
+  index:

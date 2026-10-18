@@ -1,0 +1,11 @@
+.git
+.venv
+.models
+.data
+.ruff_cache
+bin
+eval/.work
+eval/results
+notes
+plan.md
+**/__pycache__
